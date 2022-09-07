@@ -17,25 +17,13 @@ header = {
 locale.setlocale(locale.LC_ALL, 'sv_SE')
 PAGES_TO_SEARCH = 50
 HOUSE_CARDS_PER_PAGE = 50
-CHAR_TO_LOOK_FOR_ADDRESS = ['-', '/', 'Vån', 'vån', 'BV', 'lägenhet']
-CHAR_TO_LOOK_FOR_REGION = ['-', '/']
-
-
-def clean_single_data(data_to_clean, char_to_find):
-    for char in char_to_find:
-        if char in data_to_clean:
-            find_index_char = data_to_clean.find(char)
-            data_to_clean = data_to_clean[:find_index_char]
-    return data_to_clean
 
 
 def parse_html(row, loaded_hemnet_df):
     # All different housing types have these properties:
-    address_raw = row.find("h2", class_="sold-property-listing__heading qa-selling-price-title").text.strip()
-    address = clean_single_data(address_raw, CHAR_TO_LOOK_FOR_ADDRESS)
+    address = row.find("h2", class_="sold-property-listing__heading qa-selling-price-title").text.strip()
     housing_type = row.find("span", class_="svg-icon__fallback-text").text.strip()
-    region_raw = row.find("div", class_="sold-property-listing__location").text.split('\n')[7].strip(' ,')
-    region = clean_single_data(region_raw, CHAR_TO_LOOK_FOR_REGION)
+    region = row.find("div", class_="sold-property-listing__location").text.split('\n')[7].strip(' ,')
     city = row.find("div", class_="sold-property-listing__location").text.split("\n")[8].strip()
     final_price = int(
         row.find("div", class_="sold-property-listing__price").text.split('\n')[2].strip(' Slutpris kr').replace(
@@ -98,14 +86,6 @@ def parse_html(row, loaded_hemnet_df):
     else:
         price_increase = None
 
-    location = geolocator.geocode(address + ", " + city)
-
-    if location is not None:
-        latitude = location.latitude
-        longitude = location.longitude
-    else:
-        latitude = None
-        longitude = None
 
     data_series = {"address": address,
                    "housing_type": housing_type,
@@ -119,9 +99,7 @@ def parse_html(row, loaded_hemnet_df):
                    "price_increase": price_increase,
                    "price_sqr_m": price_sqr_m,
                    "land_area": land_area,
-                   "other_srq": other_sqr_area,
-                   "latitude": latitude,
-                   "longitude": longitude
+                   "other_srq": other_sqr_area
                    }
 
     return data_series
@@ -172,6 +150,6 @@ for page in range(1, PAGES_TO_SEARCH + 1):
 pd_data_series = pd.DataFrame.from_dict(data, orient="index")
 
 df_data = pd.concat([pd_data_series, loaded_hemnet_data], ignore_index=True)
-df_data.to_csv(f"hemnet_house_data_{date.today()}.csv", index=False)
+df_data.to_csv(f"hemnet_data/hemnet_house_data_{date.today()}.csv", index=False)
 
 print(f"originally {original_nr_objects} objects, now {df_data.shape[0]} objects")
