@@ -28,9 +28,9 @@ def parse_html(row, loaded_hemnet_df):
     final_price = int(
         row.find("div", class_="sold-property-listing__price").text.split('\n')[2].strip(' Slutpris kr').replace(
             '\xa0', ''))
-    sold_date = row.find("div", class_="sold-property-listing__price").text.split('\n')[5].strip(' Såld')
+    sold_date_raw = row.find("div", class_="sold-property-listing__price").text.split('\n')[5].strip(' Såld')
 
-    sold_date = str(datetime.strptime(sold_date, "%d %B %Y").date())
+    sold_date = str(datetime.strptime(sold_date_raw, "%d %B %Y").date())
 
     if housing_type == 'Övrigt':
         return None
@@ -42,47 +42,47 @@ def parse_html(row, loaded_hemnet_df):
             return None
 
     # These depend on each object. not included in all. Set to None if not included
-    sqr_meter = row.find("div", class_="sold-property-listing__subheading sold-property-listing__area")
-    rent_month = row.find("div", class_="sold-property-listing__fee")
-    price_sqr_m = row.find("div", class_="sold-property-listing__price-per-m2")
-    land_area = row.find("div", class_="sold-property-listing__land-area")
-    nr_rooms = row.find("div", class_="sold-property-listing__subheading sold-property-listing__area")
-    price_increase = row.find("div", class_="sold-property-listing__price-change")
+    sqr_meter_raw = row.find("div", class_="sold-property-listing__subheading sold-property-listing__area")
+    rent_month_raw = row.find("div", class_="sold-property-listing__fee")
+    price_sqr_m_raw = row.find("div", class_="sold-property-listing__price-per-m2")
+    land_area_raw = row.find("div", class_="sold-property-listing__land-area")
+    nr_rooms_raw = row.find("div", class_="sold-property-listing__subheading sold-property-listing__area")
+    price_increase_raw = row.find("div", class_="sold-property-listing__price-change")
     other_sqr_area = 0
 
-    if land_area is not None and 'tomt' in land_area.text:
-        land_area = float(land_area.text.strip(" \n m²tomt").replace('\xa0', '').replace(",", "."))
+    if land_area_raw is not None and 'tomt' in land_area_raw.text:
+        land_area = float(land_area_raw.text.strip(" \n m²tomt").replace('\xa0', '').replace(",", "."))
     else:
         land_area = 0
 
-    if nr_rooms is not None and "rum" in nr_rooms.text:
-        room_index = nr_rooms.text.split().index("rum") - 1
-        nr_rooms = float(nr_rooms.text.split()[room_index].replace(",", "."))
+    if nr_rooms_raw is not None and "rum" in nr_rooms_raw.text:
+        room_index = nr_rooms_raw.text.split().index("rum") - 1
+        nr_rooms = float(nr_rooms_raw.text.split()[room_index].replace(",", "."))
     else:
         nr_rooms = None
 
-    if sqr_meter is not None and "m²" in sqr_meter.text:
-        if '+' in sqr_meter.text:
-            other_sqr_area = float(sqr_meter.text.split()[2].replace(",", "."))
-        sqr_meter = float(sqr_meter.text.split()[0].replace(",", "."))
+    if sqr_meter_raw is not None and "m²" in sqr_meter_raw.text:
+        if '+' in sqr_meter_raw.text:
+            other_sqr_area = float(sqr_meter_raw.text.split()[2].replace(",", "."))
+        sqr_meter = float(sqr_meter_raw.text.split()[0].replace(",", "."))
 
     else:
         sqr_meter = None
 
-    if rent_month is not None and "kr/mån" in rent_month.text:
-        rent_month = float(rent_month.text.strip(" \n kr/mån").replace('\xa0', ''))
+    if rent_month_raw is not None and "kr/mån" in rent_month_raw.text:
+        rent_month = float(rent_month_raw.text.strip(" \n kr/mån").replace('\xa0', ''))
     else:
         rent_month = None
 
-    if price_sqr_m is not None and "kr/" in price_sqr_m.text:
-        price_sqr_m = float(price_sqr_m.text.strip(" \n kr/m²").replace('\xa0', ''))
+    if price_sqr_m_raw is not None and "kr/" in price_sqr_m_raw.text:
+        price_sqr_m = float(price_sqr_m_raw.text.strip(" \n kr/m²").replace('\xa0', ''))
     elif sqr_meter is not None:
         price_sqr_m = round(final_price / sqr_meter)
     else:
         price_sqr_m = None
 
-    if price_increase is not None and "%" in price_increase.text:
-        price_increase = float(price_increase.text.strip(" \n %").replace('\xa0', '').strip('±'))
+    if price_increase_raw is not None and "%" in price_increase_raw.text:
+        price_increase = float(price_increase_raw.text.strip(" \n %").replace('\xa0', '').strip('±'))
     else:
         price_increase = None
 
@@ -106,7 +106,7 @@ def parse_html(row, loaded_hemnet_df):
 
 
 data = {}
-path_to_hemnet_data = "hemnet_data/hemnet_house_data.csv"
+path_to_hemnet_data = "hemnet_data/hemnet_house_data_raw.csv"
 nr_objects = 0
 pbar = tqdm(total=PAGES_TO_SEARCH * HOUSE_CARDS_PER_PAGE)
 geolocator = Nominatim(user_agent="my_request")
@@ -150,6 +150,6 @@ for page in range(1, PAGES_TO_SEARCH + 1):
 pd_data_series = pd.DataFrame.from_dict(data, orient="index")
 
 df_data = pd.concat([pd_data_series, loaded_hemnet_data], ignore_index=True)
-df_data.to_csv(f"hemnet_data/hemnet_house_data_{date.today()}.csv", index=False)
+df_data.to_csv(f"hemnet_data/hemnet_house_data_raw.csv", index=False)
 
 print(f"originally {original_nr_objects} objects, now {df_data.shape[0]} objects")
