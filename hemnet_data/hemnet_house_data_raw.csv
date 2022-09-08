@@ -1,4 +1,11 @@
 address,housing_type,region,city,sqr_meter,nr_rooms,rent_month,final_price,sold_date,price_increase,price_sqr_m,land_area,other_srq
+Fruktträdsgatan 4,Lägenhet,Centrala Hisingen,Göteborgs kommun,53.0,2.0,3705.0,2150000,2022-09-08,-6.0,40566.0,0.0,0.0
+Gösta Andrées gata 6,Lägenhet,Torslanda - Amhult,Göteborgs kommun,80.5,3.0,5333.0,3800000,2022-09-08,,47205.0,0.0,0.0
+Holmbacken 5,Lägenhet,Billdal Skintebo,Göteborgs kommun,85.0,3.0,5652.0,3200000,2022-09-08,-6.0,37647.0,0.0,0.0
+Viktoriagatan 12,Lägenhet,Vasastaden,Göteborgs kommun,75.0,2.0,1879.0,4890000,2022-09-08,0.0,65200.0,0.0,0.0
+Lillatorpsgatan 7A,Lägenhet,Örgryte,Göteborgs kommun,74.0,3.0,3821.0,4550000,2022-09-08,1.0,61486.0,0.0,0.0
+Hallegatan 15,Lägenhet,Göteborg,Göteborgs kommun,35.5,1.5,2903.0,1945000,2022-09-07,-2.0,54789.0,0.0,0.0
+Utjordsgatan 22,Lägenhet,Kålltorp,Göteborgs kommun,42.0,3.0,3070.0,1995000,2022-09-07,0.0,47500.0,0.0,0.0
 Norra Fiskebäcksvägen 184,Radhus,Fiskebäck,Göteborgs kommun,115.0,5.0,,5990000,2022-09-07,4.0,52087.0,170.8,0.0
 Saltmätaregatan 2,Villa,Utby,Göteborgs kommun,59.0,5.0,,4000000,2022-09-07,-9.0,67797.0,551.1,53.0
 Övralidsgatan 11,Lägenhet,Hisings Backa,Göteborgs kommun,91.0,4.0,6224.0,2100000,2022-09-07,-4.0,23077.0,0.0,0.0
