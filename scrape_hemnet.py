@@ -47,6 +47,7 @@ def parse_html(row, loaded_hemnet_df):
     price_sqr_m_raw = row.find("div", class_="sold-property-listing__price-per-m2")
     land_area_raw = row.find("div", class_="sold-property-listing__land-area")
     nr_rooms_raw = row.find("div", class_="sold-property-listing__subheading sold-property-listing__area")
+    # TODO: change to price change? in all the other files too
     price_increase_raw = row.find("div", class_="sold-property-listing__price-change")
     other_sqr_area = 0
 
@@ -85,7 +86,6 @@ def parse_html(row, loaded_hemnet_df):
         price_increase = float(price_increase_raw.text.strip(" \n %").replace('\xa0', '').strip('±'))
     else:
         price_increase = None
-
 
     data_series = {"address": address,
                    "housing_type": housing_type,
