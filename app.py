@@ -9,7 +9,7 @@ from dash import dash_table
 
 locale.setlocale(locale.LC_ALL, 'sv_SE.utf-8')
 
-data = pd.read_csv("hemnet_data/hemnet_house_data_2022-09-07.csv")
+data = pd.read_csv("hemnet_data/hemnet_house_data_processed.csv")
 
 app = dash.Dash(__name__)
 
