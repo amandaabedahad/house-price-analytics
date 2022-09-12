@@ -10,11 +10,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import mean_squared_error
 
-ua = UserAgent()
-header = {
-    "User-Agent": ua.random
-}
-
 
 def clean_address_sample(sample):
     # TODO: double check if it parses ex Hejhej 3 A correctly (space between 3 and A)
@@ -24,17 +19,30 @@ def clean_address_sample(sample):
 
 
 def clean_region_sample(sample):
-    match = re.split("\-", sample)[-1]
-    return match
+    match = re.split("[\-/,]", sample)
+    last = match[-1]
+    return last
 
 
 def get_long_lat(sample, city='Göteborgs kommun'):  # TODO: change this hardcoded city and find more efficient calcs
     address = sample + ', ' + city
+    ua = UserAgent()
+    header = {
+        "User-Agent": ua.random
+    }
+
+    geolocator = Nominatim(user_agent=str(header))
     location = geolocator.geocode(address)
     pbar.update(1)
     if location is None:
-        return None, None
-    return location.latitude, location.longitude
+        return None, None, None, None
+    address_info = location.address.split(',')
+    post_code = address_info[-2]
+    if len(address_info) == 8:
+        region = address_info[1]
+    else:
+        region = address_info[2]
+    return location.latitude, location.longitude, post_code, region
 
 
 def dummy_encoding(column_to_be_encoded):
@@ -69,7 +77,6 @@ def interpolate_missing_data_KNN(dataframe, column):
 
 
 if __name__ == '__main__':
-    geolocator = Nominatim(user_agent=str(header))
 
     path_to_file_raw_data = "hemnet_data/hemnet_house_data_raw.csv"
     path_to_file_processed_data = "hemnet_data/hemnet_house_data_processed.csv"
@@ -95,11 +102,11 @@ if __name__ == '__main__':
     new_data["region"] = new_data["region"].apply(clean_region_sample)
     new_data["address"] = new_data["address"].apply(clean_address_sample)
 
-    coordinates = new_data["address"].apply(get_long_lat)
-    new_data["latitude"], new_data["longitude"] = zip(*coordinates)
+    location_info = new_data["address"].apply(get_long_lat)
+    new_data["latitude"], new_data["longitude"], new_data["post_code"], new_data["region_NEW"] = zip(*location_info)
 
     data = pd.concat([new_data, data_processed], ignore_index=True)
-    
+
     # data = interpolate_missing_data_KNN(new_data, "price_increase")
 
-    data.to_csv("hemnet_data/hemnet_house_data_processed.csv", index=False)
+    data.to_csv("hemnet_data/hemnet_house_data_processed_test_all_Data.csv", index=False)
