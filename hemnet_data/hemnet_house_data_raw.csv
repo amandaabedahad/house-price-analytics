@@ -1,4 +1,45 @@
 address,housing_type,region,city,sqr_meter,nr_rooms,rent_month,final_price,sold_date,price_increase,price_sqr_m,land_area,other_srq
+Hinderbanan 8,Lägenhet,Kviberg,Göteborgs kommun,89.0,3.0,4606.0,3850000,2022-09-11,4.0,43258.0,0.0,0.0
+Norra Liden 25,Lägenhet,Inom Vallgraven - Otterhällan,Göteborgs kommun,89.7,4.0,6816.0,4850000,2022-09-11,-2.0,54069.0,0.0,0.0
+Wrangelsgatan 6,Lägenhet,Lunden,Göteborgs kommun,64.0,2.0,4864.0,2950000,2022-09-11,,46094.0,0.0,0.0
+Algatan 2,Villa,Påvelund - Käringberget,Göteborgs kommun,145.0,6.0,,7700000,2022-09-11,-9.0,53103.0,557.0,110.0
+Solarvsplan 36,Lägenhet,Askim,Göteborgs kommun,93.2,4.0,5805.0,3100000,2022-09-11,-6.0,33262.0,0.0,0.0
+Kyrkåsgatan 11C,Lägenhet,Kärralund,Göteborgs kommun,51.0,2.0,3041.0,2590000,2022-09-11,-2.0,50784.0,0.0,0.0
+Räkgången 1,Villa,Fiskebäck,Göteborgs kommun,220.0,7.0,,9350000,2022-09-11,-6.0,42500.0,494.0,48.0
+Bergums Prästgårdsbacke 23,Lägenhet,Olofstorp,Göteborgs kommun,78.0,3.0,4764.0,2475000,2022-09-11,1.0,31731.0,0.0,0.0
+Ekereds höjd 51,Villa,Gunnilse,Göteborgs kommun,112.0,4.0,,4950000,2022-09-11,4.0,44196.0,488.0,7.0
+Beryllgatan 2,Lägenhet,Tynnered,Göteborgs kommun,67.5,2.0,4302.0,2425000,2022-09-11,,35926.0,0.0,0.0
+Welandergatan 8,Lägenhet,Örgryte - Kärralund,Göteborgs kommun,66.0,2.5,4569.0,3300000,2022-09-11,,50000.0,0.0,0.0
+Karin Boyes gata 11,Lägenhet,Prippska Tomten,Göteborgs kommun,70.0,3.0,4257.0,4020000,2022-09-11,-5.0,57429.0,0.0,0.0
+Bockhornsgatan 13 B,Lägenhet,Gamla Masthugget,Göteborgs kommun,47.0,2.0,3065.0,3380000,2022-09-11,4.0,71915.0,0.0,0.0
+Pärt-Antons gata 53,Radhus,Påvelund,Göteborgs kommun,152.0,7.0,,6350000,2022-09-10,-2.0,41776.0,568.7,0.0
+Eklandagatan 1,Lägenhet,Lorensberg,Göteborgs kommun,112.0,4.0,3426.0,7850000,2022-09-10,5.0,70089.0,0.0,0.0
+Nedergårdsgatan 9,Lägenhet,Kålltorp,Göteborgs kommun,30.0,1.0,2009.0,1950000,2022-09-10,0.0,65000.0,0.0,0.0
+Björklundavägen 8,Lägenhet,Nya Hovås,Göteborgs kommun,53.0,2.0,3121.0,2695000,2022-09-09,0.0,50849.0,0.0,0.0
+Kransen 4E,Lägenhet,Strömmensberg,Göteborgs kommun,39.0,1.0,2590.0,2000000,2022-09-09,1.0,51282.0,0.0,0.0
+Gamla Tuvevägen 8,Lägenhet,Kvillebäcken,Göteborgs kommun,55.0,2.0,3410.0,2650000,2022-09-09,0.0,48182.0,0.0,0.0
+Ängholmsgatan 11,Tomt,Långedrag,Göteborgs kommun,599.0,,,10700000,2022-09-09,0.0,17863.0,0.0,0.0
+Brattåskärrsvägen 201,Lägenhet,Björkekärr,Göteborgs kommun,67.0,2.0,4042.0,2950000,2022-09-09,,44030.0,0.0,0.0
+Vintergatan 5,Lägenhet,Sannegårdshamnen,Göteborgs kommun,109.0,5.0,3512.0,6925000,2022-09-09,-1.0,63532.0,0.0,0.0
+Sandrevelsvägen 13,Lägenhet,Skogome,Göteborgs kommun,34.2,1.0,2449.0,1325000,2022-09-09,,38743.0,0.0,0.0
+Kapplandsgatan 18,Lägenhet,Högsbo,Göteborgs kommun,66.0,3.0,4076.0,2725000,2022-09-09,2.0,41288.0,0.0,0.0
+Bredängen 16,Radhus,Billdal,Göteborgs kommun,135.0,6.0,,5650000,2022-09-09,-2.0,41852.0,108.0,18.0
+Norra Liden 4,Lägenhet,Otterhällan / Kungshöjd,Göteborgs kommun,130.0,4.0,5931.0,8500000,2022-09-09,,65385.0,0.0,0.0
+Distansgatan 23A,Lägenhet,Högsbo,Göteborgs kommun,55.9,2.0,3816.0,2500000,2022-09-09,4.0,44723.0,0.0,0.0
+Lilla Bottnevägen 48B,Lägenhet,Torslanda - Centralt,Göteborgs kommun,71.0,3.0,3500.0,3850000,2022-09-09,-4.0,54225.0,0.0,0.0
+Brunkebergsgatan 3F,Lägenhet,Lunden,Göteborgs kommun,55.0,2.0,3366.0,2700000,2022-09-09,2.0,49091.0,0.0,0.0
+Sagogången 42,Lägenhet,Hisings Backa,Göteborgs kommun,45.5,2.0,3540.0,1425000,2022-09-09,-5.0,31319.0,0.0,0.0
+Svängrumsgatan 83,Lägenhet,Högsbo,Göteborgs kommun,77.0,3.0,4212.0,3700000,2022-09-09,0.0,48052.0,0.0,0.0
+Barken Beatrices Gata 2,Lägenhet,Sannegårdshamnen,Göteborgs kommun,96.0,4.0,5330.0,4500000,2022-09-09,-4.0,46875.0,0.0,0.0
+Maskrosgatan 16,Radhus,Kvillebäcken,Göteborgs kommun,107.0,5.0,,4560000,2022-09-09,1.0,42617.0,286.5,5.0
+Marklandsgatan 43,Lägenhet,Högsbo,Göteborgs kommun,54.0,2.0,3579.0,2290000,2022-09-09,0.0,42407.0,0.0,0.0
+Tunnlandsgatan 18,Lägenhet,Kaverös,Göteborgs kommun,59.5,2.0,2045.0,2120000,2022-09-09,0.0,35630.0,0.0,0.0
+Tångenvägen 13,Radhus,Tuve,Göteborgs kommun,114.0,4.0,,3725000,2022-09-08,,32675.0,639.0,45.0
+Salviatorget 2,Lägenhet,Gårdsten,Göteborgs kommun,32.0,1.0,2609.0,1000000,2022-09-07,1.0,31250.0,0.0,0.0
+Storkgatan 4 C,Lägenhet,Bagaregården,Göteborgs kommun,56.6,2.0,3517.0,2550000,2022-09-07,-6.0,45053.0,0.0,0.0
+Flöjtgatan 17,Lägenhet,Ruddalen,Göteborgs kommun,70.0,3.0,4961.0,2000000,2022-09-01,-9.0,28571.0,0.0,0.0
+Fredholmsgatan 24,Villa,Hisings Kärra,Göteborgs kommun,112.0,5.0,,4200000,2022-08-30,-12.0,37500.0,846.0,109.0
+Sandbanksvägen 5,Radhus,Skogome,Göteborgs kommun,115.0,5.0,,3500000,2022-08-29,-10.0,30435.0,209.4,20.0
 Kvillegatan 23,Lägenhet,Centrala Hisingen,Göteborgs kommun,74.0,3.0,3715.0,3700000,2022-09-09,6.0,50000.0,0.0,0.0
 "Grafiska vägen 4C, våning 8",Lägenhet,Almedal,Göteborgs kommun,34.5,1.0,2682.0,2150000,2022-09-09,-1.0,62319.0,0.0,0.0
 Fjällbogatan 51,Villa,Utby,Göteborgs kommun,75.0,6.0,,5000000,2022-09-08,-9.0,66667.0,869.9,72.0
