@@ -12,10 +12,10 @@ from sklearn.metrics import mean_squared_error
 
 
 def clean_address_sample(sample):
-    # TODO: double check if it parses ex Hejhej 3 A correctly (space between 3 and A)
-    match = re.search("([A-Ö|a-ö]+.)*(\d+)*(\w)*", sample)
+    match = re.search("([A-Ö|a-ö]+.)*(\d+)*(\w)*(\s[A-J])*", sample)
     str_match = match[0]
-    return str_match
+    str_match_formatted = re.sub(r"(?<=\d)\s", "", str_match)
+    return str_match_formatted
 
 
 def clean_region_sample(sample):
@@ -91,11 +91,11 @@ if __name__ == '__main__':
         nr_samples_data_processed = data_processed.shape[0]
 
     diff_raw_processed = nr_samples_data_raw - nr_samples_data_processed
-    pbar = tqdm(total=diff_raw_processed)
     if diff_raw_processed == 0:
         print('No new samples in dataset raw compared to processed')
         exit()
     else:
+        pbar = tqdm(total=diff_raw_processed)
         print(f'{diff_raw_processed} new samples to be processed')
 
     new_data = data_raw.loc[: diff_raw_processed - 1, :]
@@ -109,4 +109,4 @@ if __name__ == '__main__':
 
     # data = interpolate_missing_data_KNN(new_data, "price_increase")
 
-    data.to_csv("hemnet_data/hemnet_house_data_processed_test_all_Data.csv", index=False)
+    data.to_csv("hemnet_data/hemnet_house_data_processed.csv", index=False)
