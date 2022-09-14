@@ -24,7 +24,7 @@ def clean_region_sample(sample):
     return last
 
 
-def get_long_lat(sample, city='Göteborgs kommun'):  # TODO: change this hardcoded city and find more efficient calcs
+def get_long_lat(sample, pbar, city='Göteborgs kommun'):  # TODO: change this hardcoded city and find more efficient calcs
     address = sample + ', ' + city
     ua = UserAgent()
     header = {
@@ -35,14 +35,10 @@ def get_long_lat(sample, city='Göteborgs kommun'):  # TODO: change this hardcod
     location = geolocator.geocode(address)
     pbar.update(1)
     if location is None:
-        return None, None, None, None
+        return None, None, None
     address_info = location.address.split(',')
     post_code = address_info[-2]
-    if len(address_info) == 8:
-        region = address_info[1]
-    else:
-        region = address_info[2]
-    return location.latitude, location.longitude, post_code, region
+    return location.latitude, location.longitude, post_code
 
 
 def dummy_encoding(column_to_be_encoded):
@@ -76,37 +72,19 @@ def interpolate_missing_data_KNN(dataframe, column):
         print(neigh.best_params_, neigh.best_score_)
 
 
-if __name__ == '__main__':
+def process_data(new_data, pbar):
 
-    path_to_file_raw_data = "hemnet_data/hemnet_house_data_raw.csv"
-    path_to_file_processed_data = "hemnet_data/hemnet_house_data_processed.csv"
-
-    data_raw = pd.read_csv(path_to_file_raw_data)
-    nr_samples_data_raw = data_raw.shape[0]
-    if not exists(path_to_file_processed_data):
-        data_processed = None
-        nr_samples_data_processed = 0
-    else:
-        data_processed = pd.read_csv(path_to_file_processed_data)
-        nr_samples_data_processed = data_processed.shape[0]
-
-    diff_raw_processed = nr_samples_data_raw - nr_samples_data_processed
-    if diff_raw_processed == 0:
-        print('No new samples in dataset raw compared to processed')
-        exit()
-    else:
-        pbar = tqdm(total=diff_raw_processed)
-        print(f'{diff_raw_processed} new samples to be processed')
-
-    new_data = data_raw.loc[: diff_raw_processed - 1, :]
     new_data["region"] = new_data["region"].apply(clean_region_sample)
     new_data["address"] = new_data["address"].apply(clean_address_sample)
 
-    location_info = new_data["address"].apply(get_long_lat)
-    new_data["latitude"], new_data["longitude"], new_data["post_code"], new_data["region_NEW"] = zip(*location_info)
+    location_info = new_data["address"].apply(lambda x: get_long_lat(x, pbar=pbar))
+    # TODO: delete region new from here.. will obtain that from polygons instead.
+    new_data["latitude"], new_data["longitude"], new_data["post_code"] = zip(*location_info)
 
-    data = pd.concat([new_data, data_processed], ignore_index=True)
+    # data = pd.concat([new_data, data_processed], ignore_index=True)
 
     # data = interpolate_missing_data_KNN(new_data, "price_increase")
 
-    data.to_csv("hemnet_data/hemnet_house_data_processed.csv", index=False)
+    # data.to_csv("hemnet_data/hemnet_house_data_processed.csv", index=False)
+
+    return new_data
