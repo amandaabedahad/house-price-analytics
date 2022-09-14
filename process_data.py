@@ -3,12 +3,22 @@ from os.path import exists
 import pandas as pd
 from fake_useragent import UserAgent
 from geopy.geocoders import Nominatim
+import geopy
+from geopy.exc import GeocoderTimedOut
 import re
-from tqdm import tqdm
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import mean_squared_error
+
+
+def do_geocode(address, geolocator, attempt=1, max_attempts=5):
+    try:
+        return geolocator.geocode(address)
+    except GeocoderTimedOut:
+        if attempt <= max_attempts:
+            return do_geocode(address, attempt=attempt + 1)
+        raise
 
 
 def clean_address_sample(sample):
@@ -24,7 +34,8 @@ def clean_region_sample(sample):
     return last
 
 
-def get_long_lat(sample, pbar, city='Göteborgs kommun'):  # TODO: change this hardcoded city and find more efficient calcs
+def get_long_lat(sample, pbar,
+                 city='Göteborgs kommun'):  # TODO: change this hardcoded city and find more efficient calcs
     address = sample + ', ' + city
     ua = UserAgent()
     header = {
@@ -32,7 +43,8 @@ def get_long_lat(sample, pbar, city='Göteborgs kommun'):  # TODO: change this h
     }
 
     geolocator = Nominatim(user_agent=str(header))
-    location = geolocator.geocode(address)
+    location = do_geocode(address, geolocator)
+    #location = geolocator.geocode(address)
     pbar.update(1)
     if location is None:
         return None, None, None
@@ -73,12 +85,10 @@ def interpolate_missing_data_KNN(dataframe, column):
 
 
 def process_data(new_data, pbar):
-
     new_data["region"] = new_data["region"].apply(clean_region_sample)
     new_data["address"] = new_data["address"].apply(clean_address_sample)
 
     location_info = new_data["address"].apply(lambda x: get_long_lat(x, pbar=pbar))
-    # TODO: delete region new from here.. will obtain that from polygons instead.
     new_data["latitude"], new_data["longitude"], new_data["post_code"] = zip(*location_info)
 
     # data = pd.concat([new_data, data_processed], ignore_index=True)
