@@ -26,7 +26,8 @@ def map_address_to_area(hemnet_data, path_shp_file):
     rows_with_location_data = points_to_region_map.index
     hemnet_data = hemnet_data.iloc[rows_with_location_data].drop(["coordinates", "region"], axis=1)
 
-    hemnet_data = hemnet_data.merge(points_to_region_map[["region", "latitude", "longitude"]], on=["latitude", "longitude"])
+    hemnet_data = hemnet_data.merge(points_to_region_map[["region", "latitude", "longitude"]],
+                                    on=["latitude", "longitude"])
     # we get some duplicates, ugly solution atm
     hemnet_data = hemnet_data[~hemnet_data.duplicated(keep="first")]
     hemnet_data_mapped = pd.concat([hemnet_data, hemnet_data_nan_location])

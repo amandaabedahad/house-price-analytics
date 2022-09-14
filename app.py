@@ -30,7 +30,7 @@ shp_file = "geospatial_data_polygons_areas/JUR_PRIMÄROMRÅDEN_XU_region.shp"
 # Clean the data
 geo_data_raw = gpd.read_file(shp_file)
 geo_data = geo_data_raw[["PRIMÄROMRÅ", "PRIMÄRNAMN", "geometry"]]
-geo_data = geo_data.rename(columns={"PRIMÄRNAMN": "region_NEW"})
+geo_data = geo_data.rename(columns={"PRIMÄRNAMN": "region"})
 data = data.dropna(subset=["latitude", "longitude", "price_sqr_m"])
 
 
@@ -43,10 +43,10 @@ ma = folium.Map(
 ma.fit_bounds([(57.652402, 11.914561), (57.777214, 12.074102)])
 
 # Group data by region
-data_grouped_by_region = data.groupby(["region_NEW"], as_index=False).mean()
+data_grouped_by_region = data.groupby(["region"], as_index=False).mean()
 
 # Merge the grouped data with the polygon data --> yields the average data for each polygon (region)
-geo_data = geo_data.merge(data_grouped_by_region[["price_sqr_m", "region_NEW"]], on="region_NEW", how="left")
+geo_data = geo_data.merge(data_grouped_by_region[["price_sqr_m", "region"]], on="region", how="left")
 geo_data["price_sqr_m"] = geo_data["price_sqr_m"].dropna().apply(round)
 
 myscale = np.linspace(geo_data["price_sqr_m"].min(), geo_data["price_sqr_m"].max(), num=10).tolist()
@@ -58,7 +58,7 @@ interactive_regions = folium.features.GeoJson(
     control=False,
     highlight_function=highlight_function,
     tooltip=folium.features.GeoJsonTooltip(
-        fields=['region_NEW', 'price_sqr_m'],
+        fields=['region', 'price_sqr_m'],
         aliases=['Region: ', 'Price per square meter in kr: '],
         style=("background-color: white; color: #333333; font-family: arial; font-size: 12px; padding: 10px;")
     )
@@ -68,8 +68,8 @@ interactive_regions = folium.features.GeoJson(
 folium.Choropleth(geo_data=geo_data,
                   name="Choropleth",
                   data=geo_data,
-                  columns=["region_NEW", "price_sqr_m"],
-                  key_on="feature.properties.region_NEW",
+                  columns=["region", "price_sqr_m"],
+                  key_on="feature.properties.region",
                   fill_color='RdPu',
                   nan_fill_color="White",
                   nan_fill_opacity=0.3,
