@@ -12,12 +12,13 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import mean_squared_error
 
 
-def do_geocode(address, geolocator, attempt=1, max_attempts=5):
+def do_geocode(address, geolocator, attempt=1, max_attempts=10):
     try:
         return geolocator.geocode(address)
     except GeocoderTimedOut:
         if attempt <= max_attempts:
-            return do_geocode(address, attempt=attempt + 1)
+            return do_geocode(address, geolocator, attempt=attempt + 1)
+        print("url attempts exceeded")
         raise
 
 
@@ -85,6 +86,7 @@ def interpolate_missing_data_KNN(dataframe, column):
 
 
 def process_data(new_data, pbar):
+    # TODO: change these rows to new_data.loc[:, column]. At the moment, we get warning.
     new_data["region"] = new_data["region"].apply(clean_region_sample)
     new_data["address"] = new_data["address"].apply(clean_address_sample)
 

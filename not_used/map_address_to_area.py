@@ -28,7 +28,7 @@ def map_address_to_area(hemnet_data, path_shp_file):
 
     hemnet_data = hemnet_data.merge(points_to_region_map[["region", "latitude", "longitude"]],
                                     on=["latitude", "longitude"])
-    # we get some duplicates, ugly solution atm
+    # we get some duplicates, ugly solution atm. should be solved before it happens
     hemnet_data = hemnet_data[~hemnet_data.duplicated(keep="first")]
     hemnet_data_mapped = pd.concat([hemnet_data, hemnet_data_nan_location])
     # hemnet_data.to_csv("hemnet_data/hemnet_house_data_processed.csv", index=False)
