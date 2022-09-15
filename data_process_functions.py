@@ -1,5 +1,4 @@
-from os.path import exists
-
+import numpy as np
 import pandas as pd
 from fake_useragent import UserAgent
 from geopy.geocoders import Nominatim
@@ -60,6 +59,23 @@ def dummy_encoding(column_to_be_encoded):
     return dummy_enc
 
 
+def date_encoding(data, column, time_period):
+    # time period ex 12 for month, 24 for hour etc
+    data[column + '_sin'] = np.sin(2 * np.pi * data[column] / time_period)
+    data[column + '_cos'] = np.cos(2 * np.pi * data[column] / time_period)
+    return data
+
+
+def interpolate_missing_data_standard_way(data, column):
+    for housing_type in data["housing_type"].unique():
+        rslt_data = data.loc[data.housing_type == housing_type, column]
+        nan_samples = rslt_data.isna()
+        rslt_data = rslt_data.interpolate(method="linear")
+        interpolated_data = rslt_data.loc[nan_samples]
+        data[housing_type] = rslt_data
+    return data
+
+
 def interpolate_missing_data_KNN(dataframe, column):
     # interpolates by taking the average of the nearby houses, implemented using KNN regression
     # data_that_needs_interpolation =
@@ -72,6 +88,7 @@ def interpolate_missing_data_KNN(dataframe, column):
             X = rslt_data[["sqr_meter", "nr_rooms", "rent_month", "final_price", "latitude", "longitude"]]
         elif housing_type == "Villa":
             X = rslt_data[["sqr_meter", "nr_rooms", "final_price", "land_area", "other_srq", "latitude", "longitude"]]
+            continue
         else:
             continue
         param = {"n_neighbors": range(1, 20), "weights": ["uniform", "distance"]}
@@ -84,6 +101,10 @@ def interpolate_missing_data_KNN(dataframe, column):
         mse = mean_squared_error(y_test, neigh.predict(X_test))
         print(mse)
         print(neigh.best_params_, neigh.best_score_)
+
+    def interpolate_missing_data_mean(data, columns):
+        data.interpolate()
+        return data
 
 
 def map_address_to_area(hemnet_data, path_shp_file):
@@ -102,7 +123,6 @@ def map_address_to_area(hemnet_data, path_shp_file):
     points = gpd.GeoDataFrame(hemnet_data[["coordinates", "address", "latitude", "longitude"]], geometry="coordinates")
     points_to_region_map = gpd.tools.sjoin(points, geo_data, predicate="within")
 
-    # TODO: will delete this region_new when new processed datafile is extracted
     hemnet_data_nan_location = hemnet_data[hemnet_data["longitude"].isna()].drop("coordinates", axis=1)
     rows_with_location_data = points_to_region_map.index
     hemnet_data = hemnet_data.iloc[rows_with_location_data].drop(["coordinates", "region"], axis=1)
@@ -122,11 +142,5 @@ def process_data(new_data, pbar):
 
     location_info = new_data["address"].apply(lambda x: get_long_lat(x, pbar=pbar))
     new_data["latitude"], new_data["longitude"], new_data["post_code"] = zip(*location_info)
-
-    # data = pd.concat([new_data, data_processed], ignore_index=True)
-
-    # data = interpolate_missing_data_KNN(new_data, "price_increase")
-
-    # data.to_csv("hemnet_data/hemnet_house_data_processed.csv", index=False)
 
     return new_data
