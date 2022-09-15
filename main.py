@@ -5,8 +5,7 @@ from os.path import exists
 from tqdm import tqdm
 import pandas as pd
 from scrape_hemnet import main_scrape_hemnet
-from process_data import process_data
-from map_address_to_area import map_address_to_area
+import data_process_functions
 
 if __name__ == "__main__":
     path_to_hemnet_data_raw = "hemnet_data/hemnet_house_data_raw.csv"
@@ -32,10 +31,17 @@ if __name__ == "__main__":
     pbar = tqdm(total=diff_raw_processed)
     print(f'{diff_raw_processed} new samples to be processed')
 
-    new_data = raw_hemnet_data.loc[: diff_raw_processed - 1, :]
-    processed_new_data = process_data(new_data, pbar)
+    new_data = raw_hemnet_data.iloc[:diff_raw_processed].copy()
+    # TODO: change these rows to new_data.loc[:, column]. At the moment, we get warning.
+    new_data["region"] = new_data["region"].apply(data_process_functions.clean_region_sample)
+    new_data.loc[:, "address"] = new_data["address"].apply(data_process_functions.clean_address_sample)
 
-    processed_new_data = map_address_to_area(processed_new_data, path_shp_file)
+    location_info = new_data["address"].apply(lambda x: data_process_functions.get_long_lat(x, pbar=pbar))
+    new_data["latitude"], new_data["longitude"], new_data["post_code"] = zip(*location_info)
+
+    # processed_new_data = process_data(new_data, pbar)
+
+    processed_new_data = data_process_functions.map_address_to_area(new_data, path_shp_file)
 
     hemnet_data = pd.concat([processed_new_data, data_processed], ignore_index=True)
 
