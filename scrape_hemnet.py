@@ -5,7 +5,7 @@ import requests
 from fake_useragent import UserAgent
 from tqdm import tqdm
 from os.path import exists
-from geopy.geocoders import Nominatim
+import os
 import locale
 from datetime import datetime
 
@@ -13,7 +13,11 @@ ua = UserAgent()
 header = {
     "User-Agent": ua.random
 }
-locale.setlocale(locale.LC_ALL, 'sv_SE')
+if os.name == 'nt':
+    locale.setlocale(locale.LC_ALL, 'sv_SE')
+else:
+    locale.setlocale(locale.LC_ALL, 'sv_SE.utf8')
+
 PAGES_TO_SEARCH = 50
 HOUSE_CARDS_PER_PAGE = 50
 
