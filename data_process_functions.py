@@ -121,6 +121,7 @@ def map_address_to_area(hemnet_data, path_shp_file):
     hemnet_data["coordinates"] = hemnet_data["coordinates"].apply(Point)
 
     points = gpd.GeoDataFrame(hemnet_data[["coordinates", "address", "latitude", "longitude"]], geometry="coordinates")
+    points.crs = "EPSG:4326"
     points_to_region_map = gpd.tools.sjoin(points, geo_data, predicate="within")
 
     hemnet_data_nan_location = hemnet_data[hemnet_data["longitude"].isna()].drop("coordinates", axis=1)
