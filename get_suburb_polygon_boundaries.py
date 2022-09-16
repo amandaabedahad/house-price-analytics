@@ -5,7 +5,7 @@ import pandas as pd
 import re
 import locale
 
-locale.setlocale(locale.LC_ALL, 'sv_SE')
+locale.setlocale(locale.LC_ALL, 'sv_SE.utf8')
 ua = UserAgent()
 header = {"User-Agent": ua.random}
 hemnet_data = pd.read_csv("hemnet_data/hemnet_house_data_processed.csv")
@@ -21,5 +21,5 @@ for suburb in suburbs.unique():
         response = requests.get(url, headers=header).text
         dict_polygons[suburb] = response
 
-with open("polygon_suburbs_gothenburg.json", 'w') as polygon_file:
+with open("not_used/polygon_suburbs_gothenburg.json", 'w') as polygon_file:
     polygon_file.write(json.dumps(dict_polygons))
