@@ -108,7 +108,7 @@ def parse_html(row, loaded_hemnet_df):
     return data_series
 
 
-def main_scrape_hemnet(path_to_hemnet_data):
+def main_scrape_hemnet(path_to_hemnet_data, logging):
     data = {}
     nr_objects = 0
     pbar = tqdm(total=PAGES_TO_SEARCH * HOUSE_CARDS_PER_PAGE)
@@ -146,7 +146,8 @@ def main_scrape_hemnet(path_to_hemnet_data):
             data[nr_objects] = data_series
         if nr_consecutive_pages_already_documented == 2:
             pbar.close()
-            print("100 objects in a row already in file, assume that the remaining objects are also in file. ")
+            print("100 consecutive listings already in file, assume that the remaining listings are also in raw data "
+                  "set. ")
             break
 
     pd_data_series = pd.DataFrame.from_dict(data, orient="index")
@@ -155,4 +156,5 @@ def main_scrape_hemnet(path_to_hemnet_data):
     df_data.to_csv(f"hemnet_data/hemnet_house_data_raw.csv", index=False)
 
     print(f"originally {original_nr_objects} objects, now {df_data.shape[0]} objects")
+    logging.info(f"web scraping - originally {original_nr_objects} objects, now {df_data.shape[0]} objects")
     return df_data
