@@ -38,7 +38,7 @@ def parse_html(row, loaded_hemnet_df):
     specific_info_listing = pd.DataFrame.from_dict({"address": address, "sold_date": sold_date,
                                                     "final_price": final_price}, orient="index").T
     # if sold_date, address and final price already included in data --> move on to next listing
-    if [True, True, True] in (specific_info_listing.values == loaded_hemnet_df[["address", "sold_date", "final_price"]].values):
+    if (specific_info_listing.values == loaded_hemnet_df[["address", "sold_date", "final_price"]].values).sum(axis=1).max() == 3:
         return None
     elif housing_type == 'Övrigt':
         return None
