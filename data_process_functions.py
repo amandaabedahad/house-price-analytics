@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from fake_useragent import UserAgent
 from geopy.geocoders import Nominatim
-from geopy.exc import GeocoderTimedOut
+from geopy.exc import GeocoderUnavailable
 import re
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.model_selection import train_test_split
@@ -15,7 +15,7 @@ from shapely.geometry import Point
 def do_geocode(address, geolocator, attempt=1, max_attempts=10):
     try:
         return geolocator.geocode(address)
-    except GeocoderTimedOut:
+    except GeocoderUnavailable:
         if attempt <= max_attempts:
             return do_geocode(address, geolocator, attempt=attempt + 1)
         print("url attempts exceeded")
