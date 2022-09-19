@@ -19,10 +19,11 @@ if __name__ == "__main__":
     if not exists(path_log_file):
         os.makedirs(path_log_file.split('/')[0], exist_ok=True)
         f = open(path_log_file, "w+")
-    logging.basicConfig(filename=path_log_file, filemode="a", level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-    logging.info("Main script started")
-    raw_hemnet_data = main_scrape_hemnet(path_to_hemnet_data_raw, logging)
+    logging.basicConfig(filename=path_log_file, filemode="a", level=logging.INFO, format='%(asctime)s - %(levelname)s '
+                                                                                         '- %(message)s')
+    my_logger = logging.getLogger("my_logger")
+    my_logger.info("\n Main script started")
+    raw_hemnet_data = main_scrape_hemnet(path_to_hemnet_data_raw, my_logger)
     nr_samples_raw_data = raw_hemnet_data.shape[0]
 
     if not exists(path_to_hemnet_data_processed):
@@ -36,16 +37,15 @@ if __name__ == "__main__":
 
     if diff_raw_processed == 0:
         print('No new samples in dataset raw compared to processed')
-        logging.info("0 new listings that needs to be processed - script exited")
+        my_logger.info("0 new listings that needs to be processed - script exited")
         exit()
-    logging.info(f"{diff_raw_processed} new listings that needs to be processed")
+    my_logger.info(f"{diff_raw_processed} new listings that needs to be processed")
     pbar = tqdm(total=diff_raw_processed)
     print(f'{diff_raw_processed} new samples to be processed')
 
     new_data = raw_hemnet_data.iloc[:diff_raw_processed].copy()
-    # TODO: change these rows to new_data.loc[:, column]. At the moment, we get warning.
     new_data["region"] = new_data["region"].apply(data_process_functions.clean_region_sample)
-    new_data.loc[:, "address"] = new_data["address"].apply(data_process_functions.clean_address_sample)
+    new_data["address"] = new_data["address"].apply(data_process_functions.clean_address_sample)
 
     location_info = new_data["address"].apply(lambda x: data_process_functions.get_long_lat(x, pbar=pbar))
     new_data["latitude"], new_data["longitude"], new_data["post_code"] = zip(*location_info)
