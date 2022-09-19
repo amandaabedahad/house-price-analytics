@@ -39,9 +39,9 @@ if __name__ == "__main__":
     location_info = new_data["address"].apply(lambda x: data_process_functions.get_long_lat(x, pbar=pbar))
     new_data["latitude"], new_data["longitude"], new_data["post_code"] = zip(*location_info)
 
-    # processed_new_data = process_data(new_data, pbar)
-
     processed_new_data = data_process_functions.map_address_to_area(new_data, path_shp_file)
+
+    assert processed_new_data.shape[0] == new_data.shape[0]
 
     hemnet_data = pd.concat([processed_new_data, data_processed], ignore_index=True)
 
