@@ -35,14 +35,13 @@ def parse_html(row, loaded_hemnet_df):
 
     sold_date = str(datetime.strptime(sold_date_raw, "%d %B %Y").date())
 
-    if housing_type == 'Övrigt':
+    specific_info_listing = pd.DataFrame.from_dict({"address": address, "sold_date": sold_date,
+                                                    "final_price": final_price}, orient="index").T
+    # if sold_date, address and final price already included in data --> move on to next listing
+    if [True, True, True] in (specific_info_listing.values == loaded_hemnet_df[["address", "sold_date", "final_price"]].values):
         return None
-
-    elif loaded_hemnet_df is not None and (loaded_hemnet_df["address"] == address).any():
-        address_series = loaded_hemnet_df[["address", "sold_date"]]
-        occurrences = address_series[address_series.values == address]
-        if (occurrences["sold_date"] == sold_date).any():
-            return None
+    elif housing_type == 'Övrigt':
+        return None
 
     # These depend on each object. not included in all. Set to None if not included
     sqr_meter_raw = row.find("div", class_="sold-property-listing__subheading sold-property-listing__area")
@@ -108,7 +107,7 @@ def parse_html(row, loaded_hemnet_df):
     return data_series
 
 
-def main_scrape_hemnet(path_to_hemnet_data, logging):
+def main_scrape_hemnet(path_to_hemnet_data, logger):
     data = {}
     nr_objects = 0
     pbar = tqdm(total=PAGES_TO_SEARCH * HOUSE_CARDS_PER_PAGE)
@@ -156,5 +155,5 @@ def main_scrape_hemnet(path_to_hemnet_data, logging):
     df_data.to_csv(f"hemnet_data/hemnet_house_data_raw.csv", index=False)
 
     print(f"originally {original_nr_objects} objects, now {df_data.shape[0]} objects")
-    logging.info(f"web scraping - originally {original_nr_objects} objects, now {df_data.shape[0]} objects")
+    logger.info(f"web scraping - originally {original_nr_objects} objects, now {df_data.shape[0]} objects")
     return df_data
