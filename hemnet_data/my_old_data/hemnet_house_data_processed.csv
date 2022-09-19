@@ -1,4 +1,9 @@
 address,housing_type,city,sqr_meter,nr_rooms,rent_month,final_price,sold_date,price_increase,price_sqr_m,land_area,other_srq,latitude,longitude,post_code,region
+Sixten Camps Gata 6,Lägenhet,Göteborgs kommun,103.0,4.0,5882.0,5350000,2022-09-15,8.0,51942.0,0.0,0.0,57.7109688,11.9933452, 416 64,Stampen
+Stampgatan 54A,Lägenhet,Göteborgs kommun,115.0,4.0,4659.0,5450000,2022-09-15,-1.0,47391.0,0.0,0.0,57.7091255,11.9872229, 411 01,Stampen
+Bokekullsgatan 6,Lägenhet,Göteborgs kommun,109.0,4.0,5275.0,6100000,2022-09-15,3.0,55963.0,0.0,0.0,57.6778754,11.9291998, 414 75,Kungsladugård
+Cederbourgsgatan 8,Lägenhet,Göteborgs kommun,60.0,2.0,2400.0,3600000,2022-09-15,-9.0,60000.0,0.0,0.0,57.6944975,11.9883922, 412 55,Krokslätt
+Hjalmar Brantingsgatan 23C,Lägenhet,Göteborgs kommun,71.0,3.0,3709.0,2560000,2022-09-14,-1.0,36056.0,0.0,0.0,57.720352,11.9557188, 417 08,Lindholmen
 Örnehufvudsgatan 3,Lägenhet,Göteborgs kommun,40.0,2.0,2635.0,2800000,2022-09-15,0.0,70000.0,0.0,0.0,57.6882795,11.9841601, 412 60,Johanneberg
 Rydholmsgatan 38,Villa,Göteborgs kommun,136.0,6.0,,7800000,2022-09-15,7.0,57353.0,513.4,108.0,57.7113095,11.8983155, 418 77,Kyrkbyn
 Karl Gustavsgatan 7B,Lägenhet,Göteborgs kommun,73.0,2.0,4592.0,5250000,2022-09-14,6.0,71918.0,0.0,0.0,57.6954905,11.9684199, 411 31,Vasastaden

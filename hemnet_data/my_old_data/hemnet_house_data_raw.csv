@@ -1,4 +1,9 @@
 address,housing_type,region,city,sqr_meter,nr_rooms,rent_month,final_price,sold_date,price_increase,price_sqr_m,land_area,other_srq
+Sixten Camps Gata 6,Lägenhet,Nya Gårda,Göteborgs kommun,103.0,4.0,5882.0,5350000,2022-09-15,8.0,51942.0,0.0,0.0
+Bokekullsgatan 6,Lägenhet,Kungsladugård,Göteborgs kommun,109.0,4.0,5275.0,6100000,2022-09-15,3.0,55963.0,0.0,0.0
+Stampgatan 54A,Lägenhet,Stampen,Göteborgs kommun,115.0,4.0,4659.0,5450000,2022-09-15,-1.0,47391.0,0.0,0.0
+Cederbourgsgatan 8,Lägenhet,Lorensberg,Göteborgs kommun,60.0,2.0,2400.0,3600000,2022-09-15,-9.0,60000.0,0.0,0.0
+Hjalmar Brantingsgatan 23C,Lägenhet,Centrala Hisingen,Göteborgs kommun,71.0,3.0,3709.0,2560000,2022-09-14,-1.0,36056.0,0.0,0.0
 Örnehufvudsgatan 3,Lägenhet,Johanneberg,Göteborgs kommun,40.0,2.0,2635.0,2800000,2022-09-15,0.0,70000.0,0.0,0.0
 Rydholmsgatan 38,Villa,Kyrkbyn,Göteborgs kommun,136.0,6.0,,7800000,2022-09-15,7.0,57353.0,513.4,108.0
 Karl Gustavsgatan 7 B,Lägenhet,Vasastaden,Göteborgs kommun,73.0,2.0,4592.0,5250000,2022-09-14,6.0,71918.0,0.0,0.0
