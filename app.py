@@ -8,10 +8,12 @@ import locale
 from dash import dash_table
 import geopandas as gpd
 import numpy as np
+import branca.colormap as cmp
+from dash import Input, Output
 
 # TODO: need to structure this file nicely
 
-locale.setlocale(locale.LC_ALL, 'sv_SE.utf-8')
+locale.setlocale(locale.LC_ALL, 'sv_SE.utf8')
 app = dash.Dash(__name__)
 
 style_function = lambda x: {'fillColor': '#ffffff',
@@ -24,15 +26,14 @@ highlight_function = lambda x: {'fillColor': '#000000',
                                 'weight': 0.1}
 
 # Read hemnet data and geo data
-data = pd.read_csv("hemnet_data/hemnet_house_data_processed.csv")
+data_all = pd.read_csv("hemnet_data/hemnet_house_data_processed.csv")
 shp_file = "geospatial_data_polygons_areas/JUR_PRIMÄROMRÅDEN_XU_region.shp"
 
 # Clean the data
 geo_data_raw = gpd.read_file(shp_file)
 geo_data = geo_data_raw[["PRIMÄROMRÅ", "PRIMÄRNAMN", "geometry"]]
 geo_data = geo_data.rename(columns={"PRIMÄRNAMN": "region"})
-data = data.dropna(subset=["latitude", "longitude", "price_sqr_m"])
-
+data = data_all.dropna(subset=["latitude", "longitude", "price_sqr_m"])
 
 # Create map to include in DASH-app
 ma = folium.Map(
@@ -64,13 +65,21 @@ interactive_regions = folium.features.GeoJson(
     )
 )
 
+colormap = cmp.linear.YlGnBu_09.to_step(data=geo_data['price_sqr_m'].dropna(), method='quant',
+                                        quantiles=[0, 0.1, 0.75, 0.9, 0.98, 1])
+
+style_function_2 = lambda x: {"weight": 0.5,
+                              'color': 'black',
+                              'fillColor': colormap(x['price_sqr_m']),
+                              'fillOpacity': 0.75}
+
 # Visuals regions and color depending on the value of price per square meter.
 folium.Choropleth(geo_data=geo_data,
                   name="Choropleth",
                   data=geo_data,
                   columns=["region", "price_sqr_m"],
                   key_on="feature.properties.region",
-                  fill_color='RdPu',
+                  fill_color="YlGn",
                   nan_fill_color="White",
                   nan_fill_opacity=0.3,
                   fill_opacity=0.8,
@@ -116,19 +125,39 @@ app.layout = html.Div(
             className="card"
         ),
         html.Div(
-            children=[dcc.Graph(figure=fig_scatter, className='plot'),
-                      dcc.Graph(figure=fig_prices_over_time, className="plot")],
-            className="parent"
+            children=[dcc.Dropdown(
+                id="object-filter",
+                options=[{"label": object_type, "value": object_type} for object_type in data.housing_type.unique()],
+                value="Lägenhet"
+            )]
         ),
         html.Div(
-            children=[dcc.Dropdown(
-                id="test",
-                options=[{"label": object_type, "value": object_type} for object_type in data.housing_type.unique()]
-            )]
+            children=[dcc.Graph(figure=fig_scatter, className='plot', id="price-per-room"),
+                      dcc.Graph(id="price-over-time", figure=fig_prices_over_time, className="plot")],
+            className="parent"
         )
     ],
     className="wrapper"
 )
+
+
+@app.callback(
+    Output("price-over-time", "figure"),  # , Output("price-per-room", "figure")],
+    [
+        Input("object-filter", "value"),
+    ],
+)
+def update_charts(object_type):
+    mask = (data_all.housing_type == object_type)
+    filtered_data = data_all.loc[mask, :]
+    filtered_data_groupby_type = filtered_data.groupby(["sold_date"]).mean()
+    price_over_time_figure = px.line(data_frame=filtered_data_groupby_type, y="final_price",
+                                     title="Average price over time",
+                                     labels={"final_price": "Average sold price",
+                                             "sold_date": "Sold date"})
+    price_over_time_figure.update_layout(transition_duration=500)
+    return price_over_time_figure
+
 
 if __name__ == "__main__":
     app.run_server(debug=True)
