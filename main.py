@@ -58,3 +58,5 @@ if __name__ == "__main__":
 
     hemnet_data.to_csv("hemnet_data/hemnet_house_data_processed.csv", index=False)
 
+    my_logger.info("Data scraping and processing finished.")
+

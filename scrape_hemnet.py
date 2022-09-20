@@ -147,6 +147,8 @@ def main_scrape_hemnet(path_to_hemnet_data, logger):
             pbar.close()
             print("100 consecutive listings already in file, assume that the remaining listings are also in raw data "
                   "set. ")
+            logger.info("100 consecutive listings already in file, assume that the remaining listings are also in raw "
+                        "data set.")
             break
 
     pd_data_series = pd.DataFrame.from_dict(data, orient="index")
