@@ -5,8 +5,7 @@ import requests
 from fake_useragent import UserAgent
 from tqdm import tqdm
 from os.path import exists
-from geopy.geocoders import Nominatim
-from datetime import date
+import os
 import locale
 from datetime import datetime
 
@@ -14,7 +13,11 @@ ua = UserAgent()
 header = {
     "User-Agent": ua.random
 }
-locale.setlocale(locale.LC_ALL, 'sv_SE')
+if os.name == 'nt':
+    locale.setlocale(locale.LC_ALL, 'sv_SE')
+else:
+    locale.setlocale(locale.LC_ALL, 'sv_SE.utf8')
+
 PAGES_TO_SEARCH = 50
 HOUSE_CARDS_PER_PAGE = 50
 
@@ -32,14 +35,13 @@ def parse_html(row, loaded_hemnet_df):
 
     sold_date = str(datetime.strptime(sold_date_raw, "%d %B %Y").date())
 
-    if housing_type == 'Övrigt':
+    specific_info_listing = pd.DataFrame.from_dict({"address": address, "sold_date": sold_date,
+                                                    "final_price": final_price}, orient="index").T
+    # if sold_date, address and final price already included in data --> move on to next listing
+    if (specific_info_listing.values == loaded_hemnet_df[["address", "sold_date", "final_price"]].values).sum(axis=1).max() == 3:
         return None
-
-    elif loaded_hemnet_df is not None and (loaded_hemnet_df["address"] == address).any():
-        address_series = loaded_hemnet_df[["address", "sold_date"]]
-        occurrences = address_series[address_series.values == address]
-        if (occurrences["sold_date"] == sold_date).any():
-            return None
+    elif housing_type == 'Övrigt':
+        return None
 
     # These depend on each object. not included in all. Set to None if not included
     sqr_meter_raw = row.find("div", class_="sold-property-listing__subheading sold-property-listing__area")
@@ -105,51 +107,55 @@ def parse_html(row, loaded_hemnet_df):
     return data_series
 
 
-data = {}
-path_to_hemnet_data = "hemnet_data/hemnet_house_data_raw.csv"
-nr_objects = 0
-pbar = tqdm(total=PAGES_TO_SEARCH * HOUSE_CARDS_PER_PAGE)
-geolocator = Nominatim(user_agent="my_request")
+def main_scrape_hemnet(path_to_hemnet_data, logger):
+    data = {}
+    nr_objects = 0
+    pbar = tqdm(total=PAGES_TO_SEARCH * HOUSE_CARDS_PER_PAGE)
 
-if not exists(path_to_hemnet_data):
-    loaded_hemnet_data = None
-    original_nr_objects = 0
-else:
-    loaded_hemnet_data = pd.read_csv(path_to_hemnet_data)
-    original_nr_objects = loaded_hemnet_data.shape[0]
+    if not exists(path_to_hemnet_data):
+        loaded_hemnet_data = None
+        original_nr_objects = 0
+    else:
+        loaded_hemnet_data = pd.read_csv(path_to_hemnet_data)
+        original_nr_objects = loaded_hemnet_data.shape[0]
 
-nr_consecutive_pages_already_documented = 0
+    nr_consecutive_pages_already_documented = 0
 
-for page in range(1, PAGES_TO_SEARCH + 1):
-    # TODO: change municipality code.
-    municipality_code = 17920  # for gothenburg
-    url = f"https://www.hemnet.se/salda/bostader?location_ids%5B%5D={municipality_code}&page={page}"
+    for page in range(1, PAGES_TO_SEARCH + 1):
+        # TODO: change municipality code.
+        municipality_code = 17920  # for gothenburg
+        url = f"https://www.hemnet.se/salda/bostader?location_ids%5B%5D={municipality_code}&page={page}"
 
-    # if 5 pages in a row are filled with already documented objects, then finished.
-    occurrence_counter = 0
-    response = requests.get(url, headers=header).text
-    soup = BeautifulSoup(response.encode("utf-8").decode('utf-8'), 'html.parser')
-    for row in soup.find_all('a', class_="sold-property-link js-sold-property-card-link"):
-        nr_objects += 1
-        data_series = parse_html(row, loaded_hemnet_data)
-        pbar.update(1)
-        if data_series is None:
-            occurrence_counter += 1
-            if occurrence_counter == HOUSE_CARDS_PER_PAGE:
-                nr_consecutive_pages_already_documented += 1
-                break
-            continue
+        # if 5 pages in a row are filled with already documented objects, then finished.
         occurrence_counter = 0
-        nr_consecutive_pages_already_documented = 0
-        data[nr_objects] = data_series
-    if nr_consecutive_pages_already_documented == 2:
-        pbar.close()
-        print("100 objects in a row already in file, assume that the remaining objects are also in file. ")
-        break
+        response = requests.get(url, headers=header).text
+        soup = BeautifulSoup(response.encode("utf-8").decode('utf-8'), 'html.parser')
+        for row in soup.find_all('a', class_="sold-property-link js-sold-property-card-link"):
+            nr_objects += 1
+            data_series = parse_html(row, loaded_hemnet_data)
+            pbar.update(1)
+            if data_series is None:
+                occurrence_counter += 1
+                if occurrence_counter == HOUSE_CARDS_PER_PAGE:
+                    nr_consecutive_pages_already_documented += 1
+                    break
+                continue
+            occurrence_counter = 0
+            nr_consecutive_pages_already_documented = 0
+            data[nr_objects] = data_series
+        if nr_consecutive_pages_already_documented == 2:
+            pbar.close()
+            print("100 consecutive listings already in file, assume that the remaining listings are also in raw data "
+                  "set. ")
+            logger.info("100 consecutive listings already in file, assume that the remaining listings are also in raw "
+                        "data set.")
+            break
 
-pd_data_series = pd.DataFrame.from_dict(data, orient="index")
+    pd_data_series = pd.DataFrame.from_dict(data, orient="index")
 
-df_data = pd.concat([pd_data_series, loaded_hemnet_data], ignore_index=True)
-df_data.to_csv(f"hemnet_data/hemnet_house_data_raw.csv", index=False)
+    df_data = pd.concat([pd_data_series, loaded_hemnet_data], ignore_index=True)
+    df_data.to_csv(f"hemnet_data/hemnet_house_data_raw.csv", index=False)
 
-print(f"originally {original_nr_objects} objects, now {df_data.shape[0]} objects")
+    print(f"originally {original_nr_objects} objects, now {df_data.shape[0]} objects")
+    logger.info(f"web scraping - originally {original_nr_objects} objects, now {df_data.shape[0]} objects")
+    return df_data
