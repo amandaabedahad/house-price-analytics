@@ -1,6 +1,9 @@
+import pickle
+
 import dash
+import torch
 from dash import dcc
-from dash import html
+from dash import html, ctx
 import pandas as pd
 import plotly.express as px
 import folium
@@ -9,7 +12,9 @@ from dash import dash_table
 import geopandas as gpd
 import numpy as np
 import branca.colormap as cmp
-from dash import Input, Output
+from dash import Input, Output, State
+from data_process_functions import get_long_lat
+from neural_net import Simple_nn
 
 # TODO: need to structure this file nicely
 
@@ -92,7 +97,7 @@ if __name__ == "__main__":
     ma.add_child(interactive_regions)
     ma.keep_in_front(interactive_regions)
     folium.LayerControl().add_to(ma)
-    ma.save('map_city.html')
+    ma.save('assets/map_city.html')
 
     # These dataframes are used for plots in the dash app
     data_grouped_by_rooms = data.groupby(["nr_rooms"]).mean()
@@ -120,11 +125,29 @@ if __name__ == "__main__":
                 className="header"),
             html.Div(
                 children=[html.P("Average cost per square meter in different regions"),
-                          html.Iframe(id='map1', srcDoc=open('map_city.html', 'r').read(), width='100%', height='500'),
-                          html.P("Data statistics"),
-                          dash_table.DataTable(summary_data_df.to_dict('records'),
-                                               [{"name": i, "id": i} for i in summary_data_df.columns])],
+                          html.Iframe(id='map1', srcDoc=open('assets/map_city.html', 'r').read(), width='100%',
+                                      height='500'),
+                          ],
                 className="card"
+            ),
+            html.Div([html.H2("Data set statistics"),
+                      html.Table([
+                          html.Tr([html.Th("Number of objects in dataset  "),
+                                   html.Th("Number of apartments   "),
+                                   html.Th("Number of houses  ")]),
+                          html.Tr([html.Td(data.shape[0]),
+                                   html.Td((data["housing_type"] == "Lägenhet").sum()),
+                                   html.Td((data["housing_type"] == 'Villa').sum())])
+                      ])]),
+            html.Div(
+                children=[html.H2("Predict house price"),
+                          html.P("The following parameters will be used to predict the sold price, using ML"),
+                          dcc.Input(id="square-meters", type="number", placeholder="square meters"),
+                          dcc.Input(id="number-rooms", type="number", placeholder="number of rooms"),
+                          dcc.Input(id="address", type="text", placeholder="address"),
+                          html.Button('Submit', id="submit-button", n_clicks=0),
+                          html.P(id="prediction-output")
+                          ]
             ),
             html.Div(
                 children=[dcc.Dropdown(
@@ -136,14 +159,22 @@ if __name__ == "__main__":
                 )]
             ),
             html.Div(
-                children=[dcc.Graph(figure=fig_scatter, className='plot', id="price-per-room"),
-                          dcc.Graph(id="price-over-time", figure=fig_prices_over_time, className="plot")],
-                className="parent"
-            )
+                [html.H2("Insights from data"),
+                 html.Div(
+                     children=[dcc.Graph(figure=fig_scatter, className='plot', id="price-per-room"),
+                               dcc.Graph(id="price-over-time", figure=fig_prices_over_time, className="plot")],
+                     className="parent"
+                 )]
+            ),
         ],
         className="wrapper"
     )
 
+    '''dash_table.DataTable(summary_data_df.to_dict('records'),
+                                                   [{"name": i, "id": i} for i in summary_data_df.columns])'''
+
+
+    ### Callback for dropdown list and ML input ##############################
 
     @app.callback(
         Output("price-over-time", "figure"),  # , Output("price-per-room", "figure")],
@@ -162,6 +193,27 @@ if __name__ == "__main__":
                                                  "sold_date": "Sold date"})
         price_over_time_figure.update_layout(transition_duration=500)
         return price_over_time_figure
+
+
+    @app.callback(
+        Output("prediction-output", "children"),
+        [Input("submit-button", "n_clicks"),
+         State("square-meters", "value"),
+         State("number-rooms", "value"),
+         State("address", "value")], prevent_initial_call=True
+    )
+    def predict_price(n_clicks, square_meters, number_rooms, address):
+        # TODO: doublecheck the order of the features. "latitude", "longitude"
+        latitude, longitude, _ = get_long_lat(address)
+        x = np.array([square_meters, number_rooms, latitude, longitude])
+        net = Simple_nn()
+        net.load_state_dict(torch.load("nn_model.pkl"))
+        std_scaler = pickle.load(open("standard_scaler.pkl", "rb"))
+        x_scaled = std_scaler.transform(x.reshape(1, -1))
+
+        price_prediction = net(torch.tensor(x_scaled).float())
+        output_string = f"The predicted price is {price_prediction.item()} kr"
+        return output_string
 
 
     app.run_server(debug=True)
