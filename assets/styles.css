@@ -5,17 +5,11 @@ body {
 }
 
 .header {
-    background-color: #222222;
+    background-color: #807575;
     height: 256px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-}
-
-.header-emoji {
-    font-size: 48px;
-    margin: 0 auto;
-    text-align: center;
 }
 
 .header-title {
@@ -59,6 +53,30 @@ body {
 .plot{
     display: flex;
     width: 50%
+}
+
+.styled-table {
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 500px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+    margin: 20px auto;
+}
+
+.button {
+  width: 170px;
+  height: 20px;
+  cursor: pointer;
+  border: 0px;
+  border-radius: 5px;
+  background-color: #807575;
+  color: white;
+  text-transform: uppercase;
+  font-size: 15px
+}
+
+.center{
+    margin: 25px auto;
 }
 
 @media screen and (max-width: 1200px) {
