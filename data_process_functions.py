@@ -35,7 +35,7 @@ def clean_region_sample(sample):
     return last
 
 
-def get_long_lat(sample, pbar,
+def get_long_lat(sample, pbar=None,
                  city='Göteborgs kommun'):  # TODO: change this hardcoded city and find more efficient calcs
     address = sample + ', ' + city
     ua = UserAgent()
@@ -46,7 +46,8 @@ def get_long_lat(sample, pbar,
     geolocator = Nominatim(user_agent=str(header))
     location = do_geocode(address, geolocator)
     # location = geolocator.geocode(address)
-    pbar.update(1)
+    if pbar is not None:
+        pbar.update(1)
     if location is None:
         return None, None, None
     address_info = location.address.split(',')
@@ -131,15 +132,4 @@ def map_address_to_area(hemnet_data, path_shp_file):
     hemnet_data_merged = hemnet_data_with_loc_data.merge(points_to_region_map[["region", "latitude", "longitude"]],
                                     on=["latitude", "longitude"]).drop_duplicates()
     hemnet_data_mapped = pd.concat([hemnet_data_merged, hemnet_data_nan_location])
-    # hemnet_data.to_csv("hemnet_data/hemnet_house_data_processed.csv", index=False)
     return hemnet_data_mapped
-
-
-def process_data(new_data, pbar):
-    new_data["region"] = new_data["region"].apply(clean_region_sample)
-    new_data["address"] = new_data["address"].apply(clean_address_sample)
-
-    location_info = new_data["address"].apply(lambda x: get_long_lat(x, pbar=pbar))
-    new_data["latitude"], new_data["longitude"], new_data["post_code"] = zip(*location_info)
-
-    return new_data
