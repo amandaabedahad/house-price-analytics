@@ -52,6 +52,7 @@ if __name__ == "__main__":
 
     processed_new_data = data_process_functions.map_address_to_area(new_data, path_shp_file)
 
+    # We don't want the address mapping to delete/add listings.
     assert processed_new_data.shape[0] == new_data.shape[0]
 
     hemnet_data = pd.concat([processed_new_data, data_processed], ignore_index=True)
