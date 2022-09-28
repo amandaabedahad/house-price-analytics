@@ -8,6 +8,7 @@ import pandas as pd
 from scrape_hemnet import main_scrape_hemnet
 import data_process_functions
 import logging
+from ML_models import update_ml_model
 
 
 if __name__ == "__main__":
@@ -25,7 +26,6 @@ if __name__ == "__main__":
     my_logger.info("\n Main script started")
     raw_hemnet_data = main_scrape_hemnet(path_to_hemnet_data_raw, my_logger)
     nr_samples_raw_data = raw_hemnet_data.shape[0]
-
     if not exists(path_to_hemnet_data_processed):
         data_processed = None
         nr_samples_data_processed = 0
@@ -56,7 +56,7 @@ if __name__ == "__main__":
     assert processed_new_data.shape[0] == new_data.shape[0]
 
     hemnet_data = pd.concat([processed_new_data, data_processed], ignore_index=True)
-
+    # update_ml_model(hemnet_data, my_logger)
     hemnet_data.to_csv("hemnet_data/hemnet_house_data_processed.csv", index=False)
 
     my_logger.info("Data scraping and processing finished.")
