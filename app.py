@@ -34,6 +34,7 @@ def use_random_forest_model(x, path_model="random_forest_model.joblib"):
 if __name__ == "__main__":
     locale.setlocale(locale.LC_ALL, 'sv_SE.utf8')
     app = dash.Dash(__name__)
+    server = app.server
 
     style_function = lambda x: {'fillColor': '#ffffff',
                                 'color': '#000000',
