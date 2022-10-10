@@ -75,6 +75,7 @@ def random_forest_regressor(X, y, logger=None):
 
     Tuned_RandForest = GridSearchCV(estimator=RandForest, param_grid=param_grid, scoring='neg_root_mean_squared_error',
                                     cv=5)
+
     std = StandardScaler()
     X_train = std.fit_transform(X_train)
     X_test = std.transform(X_test)
@@ -84,7 +85,7 @@ def random_forest_regressor(X, y, logger=None):
     # esti.plot_learning_curve(Tuned_RandForest, X, y)
     plt.show()
     print(np.sqrt(mean_squared_error(y_test, y_predict)))
-    mean_percentage_off_test_set = get_percentage_off(y_test, y_predict).mean()
+    mean_percentage_off_test_set = get_percentage_off(y_test, y_predict).mean(axis=0)
     print(mean_percentage_off_test_set)
     if logger:
         logger.info(f"Mean percentage off on test set is: {mean_percentage_off_test_set}")
@@ -111,9 +112,10 @@ if __name__ == "__main__":
                            cmap=plt.get_cmap("jet"), colorbar=True, sharex=False)
     # plt.show()
     filtered_data = hemnet_house_data[hemnet_house_data["housing_type"] == "Lägenhet"]
-    data = filtered_data[["sqr_meter", "nr_rooms", "final_price", "latitude", "longitude"]].dropna()
-    y = data["final_price"]
-    X = data.drop(columns=["final_price"])
+    data = filtered_data[["sqr_meter", "nr_rooms", "final_price", "latitude", "longitude", "rent_month"]].dropna()
+    data = data.drop(filtered_data[filtered_data["rent_month"]==0].index, axis=0)
+    y = data[["final_price", "rent_month"]]
+    X = data.drop(columns=["final_price", "rent_month"])
 
     forest_model, _ = random_forest_regressor(X, y)
 
