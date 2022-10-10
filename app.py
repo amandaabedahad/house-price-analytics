@@ -226,7 +226,7 @@ if __name__ == "__main__":
 
         price_prediction = use_random_forest_model(x_scaled)
 
-        output_string = f"The predicted price is {price_prediction} kr"
+        output_string = f"The predicted price is {price_prediction} kr, the average predicted percentage off on similar listings are BLABLA"
         return output_string
 
 

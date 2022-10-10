@@ -103,9 +103,6 @@ def interpolate_missing_data_KNN(dataframe, column):
         print(mse)
         print(neigh.best_params_, neigh.best_score_)
 
-    def interpolate_missing_data_mean(data, columns):
-        data.interpolate()
-        return data
 
 
 def map_address_to_area(hemnet_data, path_shp_file):

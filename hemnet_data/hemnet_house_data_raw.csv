@@ -1,4 +1,44 @@
 address,housing_type,region,city,sqr_meter,nr_rooms,rent_month,final_price,sold_date,price_increase,price_sqr_m,land_area,other_srq
+Kapplandsgatan 142,Lägenhet,Högsbo,Göteborgs kommun,66.0,3.0,4013.0,2490000.0,2022-10-09,-3.0,37727.0,0.0,0.0
+Munkebäckstorget 4,Lägenhet,Munkebäck,Göteborgs kommun,69.0,3.0,5396.0,2700000.0,2022-10-09,-7.0,39130.0,0.0,0.0
+Sylvestergatan 10,Lägenhet,Nedre Johanneberg,Göteborgs kommun,64.0,3.0,2771.0,4500000.0,2022-10-09,-2.0,70313.0,0.0,0.0
+Walter Bengtssons Gata 37,Lägenhet,Kungsladugård,Göteborgs kommun,81.0,2.0,4223.0,3750000.0,2022-10-09,0.0,46296.0,0.0,0.0
+Haråsgatan 23,Lägenhet,Majorna,Göteborgs kommun,76.0,3.0,4384.0,3750000.0,2022-10-09,-6.0,49342.0,0.0,0.0
+Lemansgatan 8,Lägenhet,Johanneberg,Göteborgs kommun,36.0,1.5,2640.0,2640000.0,2022-10-09,6.0,73333.0,0.0,0.0
+Ängsäters Gränd 6,Lägenhet,Hovås,Göteborgs kommun,51.0,2.0,2763.0,2750000.0,2022-10-09,-2.0,53922.0,0.0,0.0
+Mariagatan 21A,Lägenhet,Kungsladugård,Göteborgs kommun,39.0,1.0,2241.0,2600000.0,2022-10-09,-3.0,66667.0,0.0,5.0
+Arsenalsgatan 4B,Lägenhet,Kungshöjd,Göteborgs kommun,88.0,2.0,5632.0,4800000.0,2022-10-08,-3.0,54545.0,0.0,0.0
+Värmlandsgatan 16B,Lägenhet,Linné,Göteborgs kommun,65.0,2.0,3632.0,4000000.0,2022-10-08,8.0,61538.0,0.0,0.0
+Ekebygatan 18,Lägenhet,Backadalen - Hisings Backa,Göteborgs kommun,90.0,4.0,6187.0,2065000.0,2022-10-07,-2.0,22944.0,0.0,0.0
+Västra Palmgrensgatan 155,Villa,Långedrag-Hinsholmen,Göteborgs kommun,141.0,6.0,,6825000.0,2022-10-07,-1.0,48404.0,635.2,26.0
+Kvadrantgatan 48,Lägenhet,Bergsjön,Göteborgs kommun,61.8,2.0,5190.0,1050000.0,2022-10-07,0.0,16990.0,0.0,0.0
+Saffransgatan 2B,Lägenhet,Angered - Gårdsten,Göteborgs kommun,104.0,4.0,5869.0,1675000.0,2022-10-07,-1.0,16106.0,0.0,0.0
+Kalmargatan 35,Villa,Tolered,Göteborgs kommun,55.0,4.0,,3700000.0,2022-10-07,3.0,67273.0,839.6,55.0
+Kapplandsgatan 122,Lägenhet,Högsbo,Göteborgs kommun,66.0,3.0,3947.0,2260000.0,2022-10-07,-6.0,34242.0,0.0,0.0
+Ekebygatan 2,Lägenhet,Hisings Backa,Göteborgs kommun,65.4,2.0,4621.0,1295000.0,2022-10-07,0.0,19801.0,0.0,0.0
+Carlströms väg 2,Villa,Torslanda - Centralt,Göteborgs kommun,120.0,5.0,,4500000.0,2022-10-07,0.0,37500.0,441.0,6.0
+Litteraturgatan 218,Lägenhet,Hisings Backa,Göteborgs kommun,48.0,1.5,2824.0,1800000.0,2022-10-07,7.0,37500.0,0.0,0.0
+Räntmästaregatan 26 E,Lägenhet,Lunden,Göteborgs kommun,50.4,2.0,3581.0,2550000.0,2022-10-07,-2.0,50595.0,0.0,0.0
+Lilla Fridhemsgatan 6 B,Lägenhet,Kungsladugård,Göteborgs kommun,52.0,2.0,3383.0,2820000.0,2022-10-07,-4.0,54231.0,0.0,0.0
+Götaholmsgatan 8,Lägenhet,Gamlestaden,Göteborgs kommun,65.0,3.0,4522.0,3030000.0,2022-10-07,8.0,46615.0,0.0,0.0
+Hallegatan 15,Lägenhet,Centrala Hisingen,Göteborgs kommun,35.5,1.0,2770.0,1650000.0,2022-10-07,-3.0,46479.0,0.0,0.0
+Sägengatan 43,Lägenhet,Hisings Backa,Göteborgs kommun,53.0,1.5,3592.0,1400000.0,2022-10-07,0.0,26415.0,0.0,0.0
+Mölndalsvägen 89D,Lägenhet,Johanneberg - Almedal,Göteborgs kommun,50.0,2.0,2972.0,2975000.0,2022-10-07,-1.0,59500.0,0.0,0.0
+Nilssonsberg 7,Lägenhet,Linnéstaden,Göteborgs kommun,101.0,4.0,4612.0,5500000.0,2022-10-07,,54455.0,0.0,0.0
+Lagmansgatan 8C,Lägenhet,Kålltorp,Göteborgs kommun,51.0,2.0,3325.0,2550000.0,2022-10-07,-2.0,50000.0,0.0,0.0
+Raketgatan 1A,Lägenhet,Guldheden,Göteborgs kommun,64.0,3.0,4735.0,3620000.0,2022-10-07,7.0,56563.0,0.0,0.0
+Virginsgatan 30,Lägenhet,Kålltorp,Göteborgs kommun,49.0,2.0,2455.0,3450000.0,2022-10-07,-1.0,70408.0,0.0,0.0
+Halvardsgatan 4,Villa,Centrala Hisingen - Krabbeliderna,Göteborgs kommun,100.0,4.0,,4700000.0,2022-10-07,-7.0,47000.0,658.0,36.0
+Kläppestigen 28,Villa,Hovås,Göteborgs kommun,215.0,6.0,,11350000.0,2022-10-07,-18.0,52791.0,1194.0,50.0
+Rubingatan 42,Lägenhet,Tynnered,Göteborgs kommun,52.5,2.0,3076.0,1550000.0,2022-10-07,4.0,29524.0,0.0,0.0
+Gräddgatan 10,Lägenhet,Kallebäck,Göteborgs kommun,30.0,1.5,2488.0,1700000.0,2022-10-07,0.0,56667.0,0.0,0.0
+Nya Älvegårdsvägen 13,Lägenhet,Torslanda - Lilleby,Göteborgs kommun,70.0,3.0,3337.0,3150000.0,2022-10-07,-4.0,45000.0,0.0,0.0
+Första Långgatan 6A,Lägenhet,Linnéstaden,Göteborgs kommun,58.0,2.0,3138.0,4000000.0,2022-10-07,-7.0,68966.0,0.0,0.0
+Västgötagatan 7,Lägenhet,Lorensberg - Heden,Göteborgs kommun,98.0,3.0,5085.0,5800000.0,2022-10-07,0.0,59184.0,0.0,0.0
+Östra Midvintersgatan 18,Lägenhet,Kortedala,Göteborgs kommun,54.0,2.0,3658.0,1510000.0,2022-10-07,-6.0,27963.0,0.0,0.0
+Rundbäcksgatan 11,Lägenhet,Kvillebäcken,Göteborgs kommun,40.5,2.0,2423.0,2200000.0,2022-10-06,-2.0,54321.0,0.0,0.0
+Valthornsgatan 6,Lägenhet,Västra Frölunda,Göteborgs kommun,36.0,1.0,2548.0,1620000.0,2022-10-06,-10.0,45000.0,0.0,0.0
+Tövädersgatan 2,Radhus,Biskopsgården,Göteborgs kommun,93.0,5.0,,3100000.0,2022-10-05,-7.0,33333.0,202.4,30.0
 Ånäsvägen 2 A,Lägenhet,Redbergsplatsen,Göteborgs kommun,63.5,3.0,4288.0,3100000.0,2022-10-06,-2.0,48819.0,0.0,0.0
 Daltorpsgatan 56,Radhus,Örgryte,Göteborgs kommun,150.0,8.0,,10000000.0,2022-10-06,5.0,66667.0,471.1,71.0
 Kvarnkullevägen 8A,Lägenhet,Torslanda - Centralt,Göteborgs kommun,77.5,3.0,4028.0,3950000.0,2022-10-06,0.0,50968.0,0.0,0.0

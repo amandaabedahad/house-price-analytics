@@ -51,8 +51,15 @@ def get_rolling_average_data(data, window):
     return average_data
 
 
+def get_percentage_off(y_true, y_pred):
+    if type(y_true).__module__ is np.__name__:
+        return np.abs(y_true - y_pred) / y_true * 100
+    else:
+        return torch.abs(y_true - y_pred) / y_true * 100
+
+
 if __name__ == "__main__":
-    batch_size = 16
+    batch_size = 32
     nr_epochs = 200
     k_folds = 5
     loss_values = []
@@ -88,8 +95,8 @@ if __name__ == "__main__":
             loss = criterion(pred, torch.reshape(y, (-1, 1)))
             loss_values.append(loss.item())
             y_formatted = torch.reshape(y, (-1, 1))
-            percentage_off = torch.abs(y_formatted - pred) / y_formatted * 100
-            percentage_off_values.append(torch.mean(percentage_off).item())
+            percentage_off_train = get_percentage_off(y_formatted, pred)
+            percentage_off_values.append(torch.mean(percentage_off_train).item())
             loss.backward()
             optimizer.step()
 
@@ -103,6 +110,10 @@ if __name__ == "__main__":
     plt.xlabel("Epochs")
     plt.ylabel("Prediction off [%]")
     plt.show()
+    X_test = torch.tensor(X_test).float()
+    y_test = torch.tensor(y_test).float()
+    percentage_off_test = torch.mean(get_percentage_off(y_test, net(X_test)))
+    print(percentage_off_test.item())
     pickle.dump(std_X, open("standard_scaler.pkl", "wb"))
     torch.save(net.state_dict(), "nn_model.pkl")
 
