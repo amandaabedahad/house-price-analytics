@@ -152,6 +152,10 @@ if __name__ == "__main__":
                 className="card"
             ),
             html.Div(
+                children=[html.P("boxplot"), html.P("how to read plot"),
+                          dcc.Graph(figure=px.box(data_frame=data, x="region", y="price_sqr_m"), id="box_plot")]
+            ),
+            html.Div(
                 children=[html.H2("Predict house price"),
                           html.P("The following parameters will be used to predict the sold price for apartments, "
                                  "using ML"),
