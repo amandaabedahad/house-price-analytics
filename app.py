@@ -14,6 +14,7 @@ import branca.colormap as cmp
 from dash import Input, Output, State
 from data_process_functions import get_long_lat
 from neural_net import Simple_nn
+import branca.colormap as cm
 
 
 # TODO: need to structure this file nicely
@@ -27,8 +28,10 @@ def use_neural_net_model(x, path_model="nn_model.pkl"):
 
 def use_random_forest_model(x, path_model="random_forest_model.joblib"):
     model = joblib.load(path_model)
-    price_prediction = model.predict(x)
-    return round(price_prediction[0])
+    prediction = model.predict(x)[0]
+    predicted_price = round(prediction[0])
+    predicted_rent = round(prediction[1])
+    return predicted_price, predicted_rent
 
 
 if __name__ == "__main__":
@@ -62,19 +65,19 @@ if __name__ == "__main__":
 
     # TODO: delete these hardcoded values only decides zoom on map
     ma.fit_bounds([(57.652402, 11.914561), (57.777214, 12.074102)])
-
+    data = data[data["housing_type"] == "Lägenhet"]
     # Group data by region
     data_grouped_by_region = data.groupby(["region"], as_index=False).mean()
 
     # Merge the grouped data with the polygon data --> yields the average data for each polygon (region)
-    geo_data = geo_data.merge(data_grouped_by_region[["price_sqr_m", "region"]], on="region", how="left")
-    geo_data["price_sqr_m"] = geo_data["price_sqr_m"].dropna().apply(round)
+    geo_data_map = geo_data.merge(data_grouped_by_region[["price_sqr_m", "region"]], on="region", how="left")
 
-    myscale = np.linspace(geo_data["price_sqr_m"].min(), geo_data["price_sqr_m"].max(), num=10).tolist()
+    geo_data_map = geo_data_map.dropna(subset=["price_sqr_m"])
+    geo_data_map["price_sqr_m"] = geo_data_map["price_sqr_m"].apply(round)
 
     # interactive part for folium map. Defined the tip that is shown when hovering over region
     interactive_regions = folium.features.GeoJson(
-        geo_data,
+        geo_data_map,
         style_function=style_function,
         control=False,
         highlight_function=highlight_function,
@@ -85,28 +88,22 @@ if __name__ == "__main__":
         )
     )
 
-    colormap = cmp.linear.YlGnBu_09.to_step(data=geo_data['price_sqr_m'].dropna(), method='quant',
-                                            quantiles=[0, 0.1, 0.75, 0.9, 0.98, 1])
+    linear_colormap = cm.linear.YlOrRd_09.to_step(data=geo_data_map["price_sqr_m"],
+                                                  index=[10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000,
+                                                         100000])
 
-    style_function_2 = lambda x: {"weight": 0.5,
-                                  'color': 'black',
-                                  'fillColor': colormap(x['price_sqr_m']),
-                                  'fillOpacity': 0.75}
-
-    # Visuals regions and color depending on the value of price per square meter.
-    folium.Choropleth(geo_data=geo_data,
-                      name="Choropleth",
-                      data=geo_data,
-                      columns=["region", "price_sqr_m"],
-                      key_on="feature.properties.region",
-                      fill_color="YlGn",
-                      nan_fill_color="White",
-                      nan_fill_opacity=0.3,
-                      fill_opacity=0.8,
-                      line_opacity=0.2,
-                      smooth_factor=0,
-                      legend_name='SEK',
-                      bins=myscale).add_to(ma)
+    linear_colormap.caption = "Price per square meter (SEK)"
+    folium.GeoJson(
+        geo_data_map,
+        style_function=lambda feature: {
+            'fillColor': linear_colormap(feature["properties"]["price_sqr_m"]),
+            'fillOpacity': 0.5,
+            'color': 'black',
+            'weight': 0,
+            'dashArray': '5, 5'
+        }
+    ).add_to(ma)
+    ma.add_child(linear_colormap)
 
     ma.add_child(interactive_regions)
     ma.keep_in_front(interactive_regions)
@@ -190,7 +187,6 @@ if __name__ == "__main__":
 
 
     ### Callback for dropdown list and ML input ##############################
-
     @app.callback(
         Output("price-over-time", "figure"),
         [
@@ -218,15 +214,15 @@ if __name__ == "__main__":
          State("address", "value")], prevent_initial_call=True
     )
     def predict_price(n_clicks, square_meters, number_rooms, address):
-        # TODO: doublecheck the order of the features. "latitude", "longitude"
         latitude, longitude, _ = get_long_lat(address)
         x = np.array([square_meters, number_rooms, latitude, longitude])
         std_scaler = pickle.load(open("standard_scaler.pkl", "rb"))
         x_scaled = std_scaler.transform(x.reshape(1, -1))
 
-        price_prediction = use_random_forest_model(x_scaled)
-
-        output_string = f"The predicted price is {price_prediction} kr, the average predicted percentage off on similar listings are BLABLA"
+        price_prediction, rent_prediction = use_random_forest_model(x_scaled)
+        # TODO: maybe test on similar listings as test and see how much the prediction is off?
+        output_string = f"The predicted price is {price_prediction} kr and the predicted average rent is " \
+                        f"{rent_prediction} kr. The average predicted percentage off on listings in this area is"
         return output_string
 
 
