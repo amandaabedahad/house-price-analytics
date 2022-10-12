@@ -17,6 +17,7 @@ from neural_net import Simple_nn
 import branca.colormap as cm
 
 
+
 # TODO: need to structure this file nicely
 
 def use_neural_net_model(x, path_model="nn_model.pkl"):
@@ -128,36 +129,43 @@ if __name__ == "__main__":
         children=[
             html.Div(
                 children=[html.H1(children="Hemnet Analytics and Insights", className="header-title"),
-                          html.P(children="Some description blabla", className="header-description")],
+                          html.P(children="This dashboard aims to provide useful information and insights of the "
+                                          "objects sold in Gothenburg, Sweden. This is an extension to information "
+                                          "already presented on the Swedish house market - www.hemnet.se.",
+                                 className="header-description")],
                 className="header"),
             html.Div(
-                children=[
-                    html.P("This dashboard aims to provide useful information and insights of the objects sold in "
-                           "Gothenburg, Sweden. The data is scraped from www.hemnet.se. The"
-                           "presented insights are based on the following dataset"),
-                    html.Table([
-                        html.Tr([html.Th("Number of objects in dataset  "),
-                                 html.Th("Number of apartments   "),
-                                 html.Th("Number of houses  ")]),
-                        html.Tr([html.Td(data.shape[0]),
-                                 html.Td((data["housing_type"] == "Lägenhet").sum()),
-                                 html.Td((data["housing_type"] == 'Villa').sum())])
-                    ], className="styled-table")]
+                children=[html.H2("Overview of the data set"),
+                          html.P("The insights presented are based upon data from www.hemnet.se. The "
+                                 "presented insights are based on the following dataset"),
+                          html.P("As clearly observed in the bar plot, the majority of listings are sold apartments. "
+                                 "Meaningful insights can only be drawn with a data set with sufficient number of "
+                                 "samples, which is why the following analytics are presented for apartments only."
+                                 "As more data is added to the data set, other housing types will be analysed"),
+                          dcc.Graph(figure=px.bar(data_frame=data_all, x="housing_type"), id="bar_plot"),
+                          ]
             ),
             html.Div(
-                children=[html.P("Average cost per square meter in different regions"),
+                children=[html.H2("Pricing situation in Gothenburg"),
+                          html.P("The interactive map presents how the average cost per square meter varies in "
+                                 "different regions in Gothenburg. The cost is displayed in SEK. We can observe some "
+                                 "regions where the price is noticeably higher - close to the ocean and in the city"),
                           html.Iframe(id='map1', srcDoc=open('map_city.html', 'r').read(), width='100%',
                                       height='500'),
                           ],
                 className="card"
             ),
             html.Div(
-                children=[html.P("boxplot"), html.P("how to read plot"),
+                children=[html.H3("Hej"),
+                          html.P("boxplot"), html.P("how to read plot"),
                           dcc.Graph(figure=px.box(data_frame=data, x="region", y="price_sqr_m"), id="box_plot")]
             ),
             html.Div(
                 children=[html.H2("Predict house price"),
-                          html.P("The following parameters will be used to predict the sold price for apartments, "
+                          html.P("As of today, Hemnet provides house price prediction as a beta service on their"
+                                 " webpage. This is however limited only to apartments in Stockholm, Sweden. "
+                                 "Similar functionality is here presented for Gothenburg.  The following parameters "
+                                 "will be used to predict the sold price for apartments, "
                                  "using ML"),
                           dcc.Input(id="square-meters", type="number", placeholder="square meters"),
                           dcc.Input(id="number-rooms", type="number", placeholder="number of rooms"),

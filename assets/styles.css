@@ -24,13 +24,13 @@ body {
     color: #CFCFCF;
     margin: 4px auto;
     text-align: center;
-    max-width: 384px;
+    max-width: 800px;
 }
 
 .wrapper {
     margin-right: auto;
     margin-left: auto;
-    max-width: 1024px;
+    max-width: 1064px;
     padding-right: 10px;
     padding-left: 10px;
     margin-top: 32px;
