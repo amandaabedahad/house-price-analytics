@@ -117,6 +117,7 @@ if __name__ == "__main__":
     y = data[["final_price", "rent_month"]]
     X = data.drop(columns=["final_price", "rent_month"])
 
-    forest_model, _ = random_forest_regressor(X, y)
+    forest_model, std = random_forest_regressor(X, y)
 
+    pickle.dump(std, open("standard_scaler.pkl", "wb"))
     joblib.dump(forest_model, "random_forest_model.joblib")
