@@ -130,3 +130,7 @@ def map_address_to_area(hemnet_data, path_shp_file):
                                     on=["latitude", "longitude"]).drop_duplicates()
     hemnet_data_mapped = pd.concat([hemnet_data_merged, hemnet_data_nan_location])
     return hemnet_data_mapped
+
+
+if __name__ == "__main__":
+    pass

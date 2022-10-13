@@ -1,7 +1,7 @@
 import pickle
 import dash
 import joblib
-import torch
+# import torch
 from dash import dcc
 from dash import html
 import pandas as pd
@@ -10,15 +10,45 @@ import folium
 import locale
 import geopandas as gpd
 import numpy as np
-import branca.colormap as cmp
 from dash import Input, Output, State
-from data_process_functions import get_long_lat
-from neural_net import Simple_nn
+# from data_process_functions import get_long_lat
+# from neural_net import Simple_nn
 import branca.colormap as cm
-
+from fake_useragent import UserAgent
+from geopy.geocoders import Nominatim
+from geopy.exc import GeocoderUnavailable
 
 
 # TODO: need to structure this file nicely
+def do_geocode(address, geolocator, attempt=1, max_attempts=10):
+    try:
+        return geolocator.geocode(address)
+    except GeocoderUnavailable:
+        if attempt <= max_attempts:
+            return do_geocode(address, geolocator, attempt=attempt + 1)
+        print("url attempts exceeded")
+        raise
+
+
+def get_long_lat(sample, pbar=None,
+                 city='Göteborgs kommun'):  # TODO: change this hardcoded city and find more efficient calcs
+    address = sample + ', ' + city
+    ua = UserAgent()
+    header = {
+        "User-Agent": ua.random
+    }
+
+    geolocator = Nominatim(user_agent=str(header))
+    location = do_geocode(address, geolocator)
+    # location = geolocator.geocode(address)
+    if pbar is not None:
+        pbar.update(1)
+    if location is None:
+        return None, None, None
+    address_info = location.address.split(',')
+    post_code = address_info[-2]
+    return location.latitude, location.longitude, post_code
+
 
 def use_neural_net_model(x, path_model="nn_model.pkl"):
     net = Simple_nn()
@@ -38,7 +68,7 @@ def use_random_forest_model(x, path_model="random_forest_model.joblib"):
 if __name__ == "__main__":
     locale.setlocale(locale.LC_ALL, 'sv_SE.utf8')
     app = dash.Dash(__name__)
-    server = app.server
+    application = app.server
 
     style_function = lambda x: {'fillColor': '#ffffff',
                                 'color': '#000000',
@@ -238,4 +268,4 @@ if __name__ == "__main__":
         return output_string
 
 
-    app.run_server(debug=True)
+    application.run(debug=False, port=8080)

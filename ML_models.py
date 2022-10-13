@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import GridSearchCV
-import scikitplot.estimators as esti
+# import scikitplot.estimators as esti
 import numpy as np
 from neural_net import get_percentage_off
 
