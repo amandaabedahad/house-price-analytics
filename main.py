@@ -56,7 +56,7 @@ if __name__ == "__main__":
     assert processed_new_data.shape[0] == new_data.shape[0]
 
     hemnet_data = pd.concat([processed_new_data, data_processed], ignore_index=True)
-    # update_ml_model(hemnet_data, my_logger)
+    update_ml_model(hemnet_data, my_logger)
     hemnet_data.to_csv("hemnet_data/hemnet_house_data_processed.csv", index=False)
 
     my_logger.info("Data scraping and processing finished.")

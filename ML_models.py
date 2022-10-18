@@ -30,10 +30,11 @@ def scatter_plot(y_true, y_predicted):
     plt.scatter(range(len(y_true)), y_predicted)
     plt.show()
 
+
 def visualize_tree(rf, X):
     tree = rf.estimators_[5]
     export_graphviz(tree, out_file='tree.dot', feature_names=X.columns, rounded=True, precision=1)
-    (graph, ) = pydot.graph_from_dot_file('tree.dot')
+    (graph,) = pydot.graph_from_dot_file('tree.dot')
     # Write graph to a png file
     graph.write_png('tree.png')
 
@@ -49,6 +50,7 @@ def lat_long_to_polar(data):
     data["r"] = r
     data["theta"] = theta
     return data
+
 
 def simple_linear_regression(X, y):
     X_train, X_test, y_train, y_test = train_test_split(X.values, y.values, test_size=0.33, random_state=42)
@@ -70,7 +72,7 @@ def random_forest_regressor(X, y, logger=None):
     param_grid = {'n_estimators': [300, 400, 500],
                   'max_features': [0.1, 0.3, 0.6]
                   }
-    print(sklearn.metrics.get_scorer_names())
+    # print(sklearn.metrics.get_scorer_names())
     RandForest = RandomForestRegressor(n_jobs=-1, random_state=0, bootstrap=True, criterion="absolute_error")
 
     Tuned_RandForest = GridSearchCV(estimator=RandForest, param_grid=param_grid, scoring='neg_root_mean_squared_error',
@@ -92,13 +94,15 @@ def random_forest_regressor(X, y, logger=None):
     return Tuned_RandForest, std
 
 
-def update_ml_model(data, logger):
+def update_ml_model(hemnet_house_data, logger):
     # Only look at apartments at the moment
     logger.info("updating machine learning model: random forest")
-    apartment_data = data[data["housing_type"] == "Lägenhet"]
-    filtered_data = apartment_data[["sqr_meter", "nr_rooms", "final_price", "latitude", "longitude"]].dropna()
-    y = filtered_data["final_price"]
-    X = filtered_data.drop(columns=["final_price"])
+    filtered_data = hemnet_house_data[hemnet_house_data["housing_type"] == "Lägenhet"]
+    data = filtered_data[["sqr_meter", "nr_rooms", "final_price", "latitude", "longitude", "rent_month"]].dropna()
+    data = data.drop(filtered_data[filtered_data["rent_month"] == 0].index, axis=0)
+
+    y = data[["final_price", "rent_month"]]
+    X = data.drop(columns=["final_price", "rent_month"])
     model, std = random_forest_regressor(X, y, logger)
 
     logger.info("New model and standard scaler is saved")
@@ -113,7 +117,7 @@ if __name__ == "__main__":
     # plt.show()
     filtered_data = hemnet_house_data[hemnet_house_data["housing_type"] == "Lägenhet"]
     data = filtered_data[["sqr_meter", "nr_rooms", "final_price", "latitude", "longitude", "rent_month"]].dropna()
-    data = data.drop(filtered_data[filtered_data["rent_month"]==0].index, axis=0)
+    data = data.drop(filtered_data[filtered_data["rent_month"] == 0].index, axis=0)
     y = data[["final_price", "rent_month"]]
     X = data.drop(columns=["final_price", "rent_month"])
 
