@@ -91,6 +91,7 @@ def random_forest_regressor(X, y, logger=None):
     print(mean_percentage_off_test_set)
     if logger:
         logger.info(f"Mean percentage off on test set is: {mean_percentage_off_test_set}")
+        logger.info(f"The parameters of the grid search were {Tuned_RandForest.best_params_}")
     return Tuned_RandForest, std
 
 
