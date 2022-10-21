@@ -1,3 +1,4 @@
+# coding=utf-8
 import pickle
 import dash
 import joblib
@@ -67,8 +68,8 @@ def use_random_forest_model(x, path_model="random_forest_model.joblib"):
 
 if __name__ == "__main__":
     locale.setlocale(locale.LC_ALL, 'sv_SE.utf8')
-    app = dash.Dash(__name__)
-    application = app.server
+    application = dash.Dash(__name__)
+    application = application.server
 
     style_function = lambda x: {'fillColor': '#ffffff',
                                 'color': '#000000',
@@ -155,7 +156,7 @@ if __name__ == "__main__":
 
     fig_price_location = None
 
-    app.layout = html.Div(
+    application.layout = html.Div(
         children=[
             html.Div(
                 children=[html.H1(children="Hemnet Analytics and Insights", className="header-title"),
@@ -229,7 +230,7 @@ if __name__ == "__main__":
 
 
     ### Callback for dropdown list and ML input ##############################
-    @app.callback(
+    @application.callback(
         Output("price-over-time", "figure"),
         [
             Input("object-filter", "value"),
@@ -248,7 +249,7 @@ if __name__ == "__main__":
         return price_over_time_figure
 
 
-    @app.callback(
+    @application.callback(
         Output("prediction-output", "children"),
         [Input("submit-button", "n_clicks"),
          State("square-meters", "value"),
@@ -268,4 +269,4 @@ if __name__ == "__main__":
         return output_string
 
 
-    application.run(debug=False, port=8080)
+    application.run(debug=True, port=8000)
