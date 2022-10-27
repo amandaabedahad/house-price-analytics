@@ -130,7 +130,7 @@ def map_address_to_area(hemnet_data, path_shp_file):
     hemnet_data_merged = hemnet_data_with_loc_data.merge(
         points_to_region_map[["region", "latitude", "longitude"]],right_index=True, left_index=True,
         suffixes=(None, '_x')).drop(["latitude_x", "longitude_x"], axis=1)
-    
+
     hemnet_data_mapped = pd.concat([hemnet_data_merged, hemnet_data_nan_location])
     return hemnet_data_mapped
 
