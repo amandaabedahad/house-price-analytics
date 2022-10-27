@@ -104,7 +104,6 @@ def interpolate_missing_data_KNN(dataframe, column):
         print(neigh.best_params_, neigh.best_score_)
 
 
-
 def map_address_to_area(hemnet_data, path_shp_file):
     hemnet_data_copy = hemnet_data.copy()
     geo_data_raw = gpd.read_file(path_shp_file)
@@ -119,15 +118,19 @@ def map_address_to_area(hemnet_data, path_shp_file):
     hemnet_data_copy["coordinates"] = list(zip(hemnet_data_copy["longitude"], hemnet_data_copy["latitude"]))
     hemnet_data_copy["coordinates"] = hemnet_data_copy["coordinates"].apply(Point)
 
-    points = gpd.GeoDataFrame(hemnet_data_copy[["coordinates", "address", "latitude", "longitude"]], geometry="coordinates")
+    points = gpd.GeoDataFrame(hemnet_data_copy[["coordinates", "address", "latitude", "longitude"]],
+                              geometry="coordinates")
     points.crs = "EPSG:4326"
     points_to_region_map = gpd.tools.sjoin(points, geo_data, predicate="within")
 
     hemnet_data_nan_location = hemnet_data_copy[hemnet_data_copy["longitude"].isna()].drop("coordinates", axis=1)
-    hemnet_data_with_loc_data = hemnet_data_copy.loc[~hemnet_data_copy["longitude"].isna()].drop(["coordinates", "region"], axis=1)
+    hemnet_data_with_loc_data = hemnet_data_copy.loc[~hemnet_data_copy["longitude"].isna()].drop(
+        ["coordinates", "region"], axis=1)
 
-    hemnet_data_merged = hemnet_data_with_loc_data.merge(points_to_region_map[["region", "latitude", "longitude"]],
-                                    on=["latitude", "longitude"]).drop_duplicates()
+    hemnet_data_merged = hemnet_data_with_loc_data.merge(
+        points_to_region_map[["region", "latitude", "longitude"]],right_index=True, left_index=True,
+        suffixes=(None, '_x')).drop(["latitude_x", "longitude_x"], axis=1)
+    
     hemnet_data_mapped = pd.concat([hemnet_data_merged, hemnet_data_nan_location])
     return hemnet_data_mapped
 

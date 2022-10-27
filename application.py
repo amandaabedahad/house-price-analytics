@@ -278,10 +278,10 @@ def update_charts(object_type):
 def predict_price(n_clicks, square_meters, number_rooms, address):
     latitude, longitude, _ = get_long_lat(address)
     x = np.array([square_meters, number_rooms, latitude, longitude])
-    std_scaler = pickle.load(open("standard_scaler.pkl", "rb"))
-    x_scaled = std_scaler.transform(x.reshape(1, -1))
+    # std_scaler = pickle.load(open("standard_scaler.pkl", "rb"))
+    # x_scaled = std_scaler.transform(x.reshape(1, -1))
 
-    price_prediction, rent_prediction = use_random_forest_model(x_scaled)
+    price_prediction, rent_prediction = use_random_forest_model(x.reshape(1, -1))
     # TODO: maybe test on similar listings as test and see how much the prediction is off?
     output_string = f"The predicted price is {price_prediction} kr and the predicted average rent is " \
                     f"{rent_prediction} kr. The average predicted percentage off on listings in this area is"
@@ -289,4 +289,4 @@ def predict_price(n_clicks, square_meters, number_rooms, address):
 
 
 if __name__ == "__main__":
-    application.run(host='0.0.0.0', port=8080)
+    application.run(debug=True, host='0.0.0.0', port=80)
