@@ -20,6 +20,23 @@ from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderUnavailable
 
 
+def select_regions_with_nr_samples(data, nr_samples_threshold):
+    """
+    Returns data with regions where the number of samples for each region is greater than threshold. This to get some
+    statistical significance when plotting in box plot, and to clean up the plot a little bit.
+
+    :param data: pandas data frame
+    :param nr_samples_threshold: threshold which decides which regions to keep
+    :return: filtered data set
+    """
+    df_part = data[["housing_type", "price_sqr_m", "region"]]
+    df_part = df_part.loc[df_part.housing_type == "Lägenhet"]
+    freq_regions_data = df_part["region"].value_counts()
+    freq_over_threshold = freq_regions_data.loc[freq_regions_data > nr_samples_threshold]
+    new_selection = df_part.loc[df_part["region"].isin(freq_over_threshold.index)]
+    return new_selection
+
+
 # TODO: need to structure this file nicely
 def do_geocode(address, geolocator, attempt=1, max_attempts=10):
     try:
@@ -182,13 +199,10 @@ app.layout = html.Div(
                              "regions where the price is noticeably higher - close to the ocean and in the city"),
                       html.Iframe(id='map1', srcDoc=open('map_city.html', 'r').read(), width='100%',
                                   height='500'),
+                      html.P("For a more in depth visualisation of the pricing situation, continue to the box plot, "
+                             "presented at the bottom of this page. ")
                       ],
             className="card"
-        ),
-        html.Div(
-            children=[html.H3("Hej"),
-                      html.P("boxplot"), html.P("how to read plot"),
-                      dcc.Graph(figure=px.box(data_frame=data, x="region", y="price_sqr_m"), id="box_plot")]
         ),
         html.Div(
             children=[html.H2("Predict house price"),
@@ -222,6 +236,12 @@ app.layout = html.Div(
                               dcc.Graph(id="price-over-time", figure=fig_prices_over_time, className="plot")],
                     className="parent"
                 )]
+        ),
+        html.Div(
+            children=[html.H3("In depth view of the pricing situation"),
+                      html.P("The box plot"), html.P("how to read plot"),
+                      dcc.Graph(figure=px.box(data_frame=select_regions_with_nr_samples(data, nr_samples_threshold=20),
+                                              x="region", y="price_sqr_m"), id="box_plot")]
         ),
     ],
     className="wrapper"
