@@ -172,6 +172,8 @@ fig_prices_over_time = px.line(data_frame=data_grouped_by_date, y="final_price",
 
 fig_price_location = None
 
+app.title = "Hemnet Analytics"
+
 app.layout = html.Div(
     children=[
         html.Div(
