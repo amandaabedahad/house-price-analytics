@@ -8,7 +8,26 @@ import pandas as pd
 from scrape_hemnet import main_scrape_hemnet
 import data_process_functions
 import logging
+import re
 from ML_models import update_ml_model
+
+
+def get_nr_new_samples_since_last_ml_update(logger_path, nr_listings_trigger_ml_update, target_word):
+    sum_new_listings = 0
+    for line in reversed(list(open(logger_path))):
+        match_nr_listings = re.search(f"\d+ {target_word}", line)
+        match_updated_model = re.search("updating machine learning model", line)
+        if match_nr_listings:
+            nr_new_listings = re.split(' ', match_nr_listings[0])[0]
+            sum_new_listings += int(nr_new_listings)
+        elif match_updated_model:
+            return sum_new_listings, False
+
+        if sum_new_listings >= nr_listings_trigger_ml_update:
+            return sum_new_listings, True
+
+    # if whole logger file is empty, we come here
+    return sum_new_listings, False
 
 
 if __name__ == "__main__":
@@ -56,8 +75,15 @@ if __name__ == "__main__":
     assert processed_new_data.shape[0] == new_data.shape[0]
 
     hemnet_data = pd.concat([processed_new_data, data_processed], ignore_index=True)
-    update_ml_model(hemnet_data, my_logger)
+
+    new_listings_since_last_ml_update, reached_trigger_amount = get_nr_new_samples_since_last_ml_update(
+        path_log_file, nr_listings_trigger_ml_update=200, target_word="new listings"
+    )
+
+    my_logger.info(f"{new_listings_since_last_ml_update} listings since last ML-update")
+
+    if reached_trigger_amount:
+        update_ml_model(hemnet_data, my_logger)
+
     hemnet_data.to_csv("hemnet_data/hemnet_house_data_processed.csv", index=False)
-
     my_logger.info("Data scraping and processing finished.")
-
