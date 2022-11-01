@@ -1,9 +1,64 @@
 address,housing_type,city,sqr_meter,nr_rooms,rent_month,final_price,sold_date,price_increase,price_sqr_m,land_area,other_srq,latitude,longitude,post_code,region
-Stora Kronogårdsgatan 21,Villa,Göteborgs kommun,177.0,7.0,,4350000.0,2022-10-28,-1.0,24576.0,423.4,0.0,57.740462449999995,11.985013662899064, 422 58,Backa
+Sjömilsgatan 5,Lägenhet,Göteborgs kommun,42.5,1.0,2611.0,1450000.0,2022-10-31,-6.0,34118.0,0.0,0.0,57.6612241,11.9285298, 421 73,Flatås
+Domherrevägen 3,Radhus,Göteborgs kommun,72.0,5.0,,4600000.0,2022-10-31,-8.0,63889.0,191.8,32.0,57.7370653,12.0623474, 415 07,Utby
+Briljantgatan 90,Lägenhet,Göteborgs kommun,70.0,3.0,4573.0,1650000.0,2022-10-31,-3.0,23571.0,0.0,0.0,57.6484788,11.9074442, 421 48,Ängås
+Monsungatan 32,Lägenhet,Göteborgs kommun,37.0,1.5,2487.0,2350000.0,2022-10-31,-2.0,63514.0,0.0,0.0,57.6984418,11.9076917, 417 66,Eriksberg
+Mölndalsvägen 87H,Lägenhet,Göteborgs kommun,55.0,2.0,3807.0,3185000.0,2022-10-31,0.0,57909.0,0.0,0.0,57.6842544,11.9997404, 412 85,Krokslätt
+Solarvsplan 30,Lägenhet,Göteborgs kommun,75.6,3.0,4828.0,2400000.0,2022-10-31,-8.0,31746.0,0.0,0.0,57.6312593,11.934648, 436 43,Askim
+Solhagagatan 4A,Radhus,Göteborgs kommun,121.0,4.0,,3820000.0,2022-10-31,3.0,31570.0,271.0,0.0,57.7990294,11.9937347, 425 31,Kärra
+Karolinernas gata 3,Lägenhet,Göteborgs kommun,64.5,2.0,4669.0,1750000.0,2022-10-31,3.0,27132.0,0.0,0.0,57.753065,11.9789721, 422 59,Skälltorp
+Persgatan 2A,Lägenhet,Göteborgs kommun,51.0,2.0,3433.0,2800000.0,2022-10-31,-3.0,54902.0,0.0,0.0,57.7137146,12.0101638, 416 57,Lunden
+Bellmansgatan 11A,Lägenhet,Göteborgs kommun,133.0,5.0,7213.0,8400000.0,2022-10-31,3.0,63158.0,0.0,0.0,57.6984809,11.9639201, 411 25,Vasastaden
+Långängen 9,Lägenhet,Göteborgs kommun,55.0,2.0,2733.0,2635000.0,2022-10-31,-2.0,47909.0,0.0,0.0,57.7219429,11.9396125, 417 17,Kvillebäcken
+Berzeliigatan 13A,Lägenhet,Göteborgs kommun,160.0,3.0,6801.0,14500000.0,2022-10-31,7.0,90625.0,0.0,0.0,57.6980482,11.9809428, 412 56,Lorensberg
+Geteryggsgatan 36,Villa,Göteborgs kommun,140.0,6.0,,6600000.0,2022-10-28,10.0,47143.0,710.0,32.0,57.712759500000004,12.065000555284854, 416 79,Björkekärr
+Kalendervägen 61,Lägenhet,Göteborgs kommun,40.3,1.0,2332.0,1250000.0,2022-10-27,5.0,31017.0,0.0,0.0,57.7510481,12.0364692, 415 08,Södra Kortedala
+Hagelidsvägen 11,Villa,Göteborgs kommun,125.0,,,4500000.0,2022-10-26,0.0,36000.0,1431.2,72.0,57.74839345,11.932737930003537, 418 71,Tuve
+Skogens gård 71,Villa,Göteborgs kommun,118.0,5.0,,5650000.0,2022-10-31,-5.0,47881.0,584.0,37.0,57.7295914,11.7857199, 423 49,Nolered
+Carlandersplatsen 1,Lägenhet,Göteborgs kommun,72.0,2.0,2234.0,4000000.0,2022-10-31,3.0,55556.0,0.0,0.0,57.6935168,11.986483, 412 55,Krokslätt
+Norra Gubberogatan 5,Lägenhet,Göteborgs kommun,60.0,2.0,3204.0,3100000.0,2022-10-30,,51667.0,0.0,0.0,57.71408705,12.000787050371493, 416 63,Olskroken
+Teleskopgatan 16,Lägenhet,Göteborgs kommun,77.5,3.0,6238.0,1330000.0,2022-10-30,3.0,17161.0,0.0,0.0,57.76014685,12.060952571212123, 415 57,Västra Bergsjön
+Fredbergsgatan 5B,Lägenhet,Göteborgs kommun,37.0,1.0,2590.0,2300000.0,2022-10-30,-2.0,62162.0,0.0,0.0,57.6928523,11.9347212, 414 64,Stigberget
+Vattentornsgatan 108,Villa,Göteborgs kommun,101.0,4.0,,2500000.0,2022-10-30,25.0,24752.0,320.0,20.0,57.7848328,12.04240484999999, 424 37,Hammarkullen
+Styrfarten 2C,Lägenhet,Göteborgs kommun,77.0,2.0,4719.0,3440000.0,2022-10-30,-3.0,44675.0,0.0,0.0,57.7002983,11.9115811, 417 64,Eriksberg
+Rudenschöldsgatan 5,Villa,Göteborgs kommun,96.0,5.0,,5900000.0,2022-10-30,3.0,61458.0,384.0,67.0,57.72493005,11.943571926607348, 417 20,Kvillebäcken
+Fredbergsgatan 5C,Lägenhet,Göteborgs kommun,51.0,2.0,3388.0,2700000.0,2022-10-30,-2.0,52941.0,0.0,0.0,57.6927732,11.9347332, 414 64,Stigberget
+Raketgatan 6,Lägenhet,Göteborgs kommun,59.0,2.0,4575.0,3050000.0,2022-10-29,5.0,51695.0,0.0,0.0,57.6912487,11.9667821, 413 21,Guldheden
+Briljantgatan 76,Lägenhet,Göteborgs kommun,70.0,3.0,3785.0,1780000.0,2022-10-29,8.0,25429.0,0.0,0.0,57.6463884,11.9068919, 421 48,Ängås
+Ekebygatan 16,Lägenhet,Göteborgs kommun,74.3,3.0,5413.0,1595000.0,2022-10-29,0.0,21467.0,0.0,0.0,57.7558497,11.9888173, 422 59,Skälltorp
+Myrbäcksvägen 22,Villa,Göteborgs kommun,205.3,6.0,,7950000.0,2022-10-29,-6.0,38724.0,690.0,42.6,57.62642045,11.94311305, 436 40,Hovås
+Virvelvindsgatan 4,Lägenhet,Göteborgs kommun,89.0,4.0,5302.0,3650000.0,2022-10-29,4.0,41011.0,0.0,0.0,57.7202066,11.942678577305252, 417 09,Rambergsstaden
+Masthuggstorget 5,Lägenhet,Göteborgs kommun,36.6,1.0,2657.0,2050000.0,2022-10-28,-2.0,56011.0,0.0,0.0,57.6991064,11.942509, 413 27,Masthugget
+Träringen ,Lägenhet,Göteborgs kommun,40.0,1.0,3160.0,1590000.0,2022-10-28,0.0,39750.0,0.0,0.0,57.7154159,12.0526459, 416 79,Björkekärr
+Fjällgatan 24C,Lägenhet,Göteborgs kommun,68.0,2.0,4643.0,2800000.0,2022-10-28,-9.0,41176.0,0.0,0.0,57.6947542,11.9378023, 414 64,Masthugget
+Distansgatan 45,Lägenhet,Göteborgs kommun,97.5,4.0,4744.0,2900000.0,2022-10-28,-3.0,29744.0,0.0,0.0,57.6605422,11.9300547, 421 72,Flatås
+Gröna gatan 67,Lägenhet,Göteborgs kommun,89.0,4.0,5579.0,3650000.0,2022-10-28,4.0,41011.0,0.0,0.0,57.6914462,11.9158288, 415 55,Majorna
+Hökegatan 12,Lägenhet,Göteborgs kommun,50.0,2.0,3078.0,2350000.0,2022-10-28,-2.0,47000.0,0.0,0.0,57.7167253,11.9999251, 416 66,Olskroken
+Fagottgatan 4,Lägenhet,Göteborgs kommun,59.5,2.0,3385.0,1650000.0,2022-10-28,-8.0,27731.0,0.0,0.0,57.6587627,11.9171311, 421 39,Ruddalen
+Rubingatan 29,Lägenhet,Göteborgs kommun,79.5,3.0,4803.0,2360000.0,2022-10-28,8.0,29686.0,0.0,0.0,57.6439507,11.9008499, 421 64,Kannebäck
+Distansgatan 15,Lägenhet,Göteborgs kommun,71.0,3.0,4770.0,2100000.0,2022-10-28,-4.0,29577.0,0.0,0.0,57.665468,11.9347871, 421 72,Flatås
+Sösbacken 13,Radhus,Göteborgs kommun,135.0,5.0,,5450000.0,2022-10-28,0.0,40370.0,108.0,18.0,57.5946648,11.9406925, 427 36,Billdal
+Rösebacken 4,Villa,Göteborgs kommun,129.0,5.0,,6400000.0,2022-10-28,3.0,49612.0,634.0,56.0,57.724858600000005,11.906145915654523, 418 70,Jättesten
+Värslevägen 47,Lägenhet,Göteborgs kommun,88.9,4.0,5609.0,2900000.0,2022-10-28,-3.0,32621.0,0.0,0.0,57.6317199,11.9335621, 436 44,Askim
+Carl Larssonsgatan 4B,Lägenhet,Göteborgs kommun,70.0,3.0,2928.0,4100000.0,2022-10-28,3.0,58571.0,0.0,0.0,57.7026912,12.0180093, 412 72,Kärralund
+Vädursgatan 4B,Lägenhet,Göteborgs kommun,90.0,3.0,4778.0,4150000.0,2022-10-28,0.0,46111.0,0.0,0.0,57.7038368,11.9915786, 412 50,Heden
+Sjupundsgatan 31,Lägenhet,Göteborgs kommun,29.0,1.0,1724.0,1600000.0,2022-10-28,-5.0,55172.0,0.0,0.0,57.674812284615385,11.919046569230767, 414 82,Högsbohöjd
+Västra Gunnesgärde 27,Lägenhet,Göteborgs kommun,65.0,2.0,4162.0,1800000.0,2022-10-28,-5.0,27692.0,0.0,0.0,57.7511332,11.9312348, 417 45,Tuve
+Kapplandsgatan 42,Lägenhet,Göteborgs kommun,66.0,3.0,4076.0,2115000.0,2022-10-28,1.0,32045.0,0.0,0.0,57.6709801,11.9325013, 414 79,Högsbotorp
+Vallhamnsgatan 6,Villa,Göteborgs kommun,165.0,6.0,,7030000.0,2022-10-27,-4.0,42606.0,981.2,70.0,57.6282493,11.901345074210523, 421 66,Näset
+Rubingatan 16,Lägenhet,Göteborgs kommun,79.5,3.0,4803.0,2100000.0,2022-10-27,-5.0,26415.0,0.0,0.0,57.6457785,11.9011426, 421 64,Kannebäck
+Källsprångsgatan 2,Lägenhet,Göteborgs kommun,71.5,3.0,3349.0,3800000.0,2022-10-27,-2.0,53147.0,0.0,0.0,57.6887537,11.9632155, 413 20,Guldheden
+Jägaregatan 1B,Lägenhet,Göteborgs kommun,64.0,2.0,4907.0,2200000.0,2022-10-26,0.0,34375.0,0.0,0.0,57.7162845,11.9446885, 417 03,Rambergsstaden
+Marklandsgatan 71,Lägenhet,Göteborgs kommun,28.0,1.0,2023.0,1550000.0,2022-10-22,-2.0,55357.0,0.0,0.0,57.6684907,11.934937, 414 77,Högsbotorp
+Pilegårdsgatan 28B,Villa,Göteborgs kommun,110.0,5.0,,5255000.0,2022-10-28,,47773.0,532.0,0.0,57.7077068,11.9103467, 418 74,Kyrkbyn
+Fruktträdsgatan 11,Lägenhet,Göteborgs kommun,93.0,4.0,4815.0,4950000.0,2022-10-28,-1.0,53226.0,0.0,0.0,,,,Centrala Hisingen Hildedal
+Stora Kronogårdsgatan 21,Villa,Göteborgs kommun,177.0,7.0,,4350000.0,2022-10-28,-1.0,24576.0,423.4,0.0,57.74046245,11.985013662899064, 422 58,Backa
 Högtrycksgatan 10,Lägenhet,Göteborgs kommun,63.7,2.0,3789.0,1100000.0,2022-10-28,11.0,17268.0,0.0,0.0,57.7356008,11.8916622, 418 42,Länsmansgården
 Sjömarksvägen 11,Villa,Göteborgs kommun,90.0,4.0,,3850000.0,2022-10-28,-12.0,42778.0,900.0,54.0,57.7621405,11.8106836, 423 61,Björlanda
+Fixfabrikens Gata 14,Lägenhet,Göteborgs kommun,70.0,2.0,3706.0,3150000.0,2022-10-28,-9.0,45000.0,0.0,0.0,57.6854251,11.9095411, 414 74,Sanna
 Doktor Forselius gata 28,Lägenhet,Göteborgs kommun,81.5,4.0,5193.0,3220000.0,2022-10-28,-2.0,39509.0,0.0,0.0,57.6796163,11.9819915, 413 26,Guldheden
 Ostgatan 14,Lägenhet,Göteborgs kommun,85.5,4.0,5886.0,3200000.0,2022-10-28,5.0,37427.0,0.0,0.0,57.6840757,12.0092103, 412 75,Kallebäck
+Lantmätaregatan 15B,Lägenhet,Göteborgs kommun,59.6,2.0,3306.0,1900000.0,2022-10-28,-5.0,31879.0,0.0,0.0,57.7224598,11.9427376, 417 06,Kvillebäcken
 Kapplandsgatan 106,Lägenhet,Göteborgs kommun,66.0,3.0,4005.0,2670000.0,2022-10-28,3.0,40455.0,0.0,0.0,57.669233,11.9327293, 414 79,Högsbotorp
 Viktor Rydbergsgatan 25,Lägenhet,Göteborgs kommun,70.0,2.5,3049.0,4490000.0,2022-10-28,0.0,64143.0,0.0,0.0,57.69299135,11.97900473097015, 411 32,Johanneberg
 Lilleby kronogård 24,Villa,Göteborgs kommun,143.0,6.0,,6500000.0,2022-10-28,-7.0,45455.0,388.0,9.0,57.7356805,11.8077865, 423 51,Björlanda
