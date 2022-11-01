@@ -35,7 +35,7 @@ jobs:
       with:
         context: .
         push: true
-        tags: amandaabedahad/hemnet_analytics:latest
+        tags: 'amandaabedahad/hemnet_analytics:latest'
         file: ./Dockerfile
 
   deploy:
@@ -53,4 +53,4 @@ jobs:
         app-name: 'hemnetAnalyticsDocker'
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_3b092825570f4a7a9da6157964f9609a }}
-        images: 'index.docker.io/${{ secrets.AzureAppService_ContainerUsername_9539628db8a84e5e9856827f66660da2 }}/amandaabedahad/hemnet_analytics:${{ github.sha }}'
+        images: 'amandaabedahad/hemnet_analytics:latest'
