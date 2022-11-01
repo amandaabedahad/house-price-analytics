@@ -1,4 +1,19 @@
 address,housing_type,region,city,sqr_meter,nr_rooms,rent_month,final_price,sold_date,price_increase,price_sqr_m,land_area,other_srq
+Sjömilsgatan 5,Lägenhet,Flatås,Göteborgs kommun,42.5,1.0,2611.0,1450000.0,2022-10-31,-6.0,34118.0,0.0,0.0
+Domherrevägen 3,Radhus,Utby,Göteborgs kommun,72.0,5.0,,4600000.0,2022-10-31,-8.0,63889.0,191.8,32.0
+Briljantgatan 90,Lägenhet,Tynnered,Göteborgs kommun,70.0,3.0,4573.0,1650000.0,2022-10-31,-3.0,23571.0,0.0,0.0
+Monsungatan 32,Lägenhet,Eriksberg,Göteborgs kommun,37.0,1.5,2487.0,2350000.0,2022-10-31,-2.0,63514.0,0.0,0.0
+Mölndalsvägen 87H,Lägenhet,Almedal - Centrum,Göteborgs kommun,55.0,2.0,3807.0,3185000.0,2022-10-31,0.0,57909.0,0.0,0.0
+Solarvsplan 30,Lägenhet,Askim,Göteborgs kommun,75.6,3.0,4828.0,2400000.0,2022-10-31,-8.0,31746.0,0.0,0.0
+Solhagagatan 4A,Radhus,Hisings Kärra,Göteborgs kommun,121.0,4.0,,3820000.0,2022-10-31,3.0,31570.0,271.0,0.0
+Karolinernas gata 3,Lägenhet,Hisings Backa,Göteborgs kommun,64.5,2.0,4669.0,1750000.0,2022-10-31,3.0,27132.0,0.0,0.0
+Persgatan 2A,Lägenhet,Lunden,Göteborgs kommun,51.0,2.0,3433.0,2800000.0,2022-10-31,-3.0,54902.0,0.0,0.0
+Bellmansgatan 11A,Lägenhet,Vasastaden,Göteborgs kommun,133.0,5.0,7213.0,8400000.0,2022-10-31,3.0,63158.0,0.0,0.0
+Långängen 9,Lägenhet,Centrala Göteborg,Göteborgs kommun,55.0,2.0,2733.0,2635000.0,2022-10-31,-2.0,47909.0,0.0,0.0
+Berzeliigatan 13A,Lägenhet,Lorensberg,Göteborgs kommun,160.0,3.0,6801.0,14500000.0,2022-10-31,7.0,90625.0,0.0,0.0
+Geteryggsgatan 36,Villa,Björkekärr,Göteborgs kommun,140.0,6.0,,6600000.0,2022-10-28,10.0,47143.0,710.0,32.0
+Kalendervägen 61,Lägenhet,Kortedala,Göteborgs kommun,40.3,1.0,2332.0,1250000.0,2022-10-27,5.0,31017.0,0.0,0.0
+Hagelidsvägen 11,Villa,Göteborg,Göteborgs kommun,125.0,,,4500000.0,2022-10-26,0.0,36000.0,1431.2,72.0
 Skogens gård 71,Villa,Torslanda - Centralt,Göteborgs kommun,118.0,5.0,,5650000.0,2022-10-31,-5.0,47881.0,584.0,37.0
 Carlandersplatsen 1,Lägenhet,Lorensberg,Göteborgs kommun,72.0,2.0,2234.0,4000000.0,2022-10-31,3.0,55556.0,0.0,0.0
 Norra Gubberogatan 5,Lägenhet,Göteborg,Göteborgs kommun,60.0,2.0,3204.0,3100000.0,2022-10-30,,51667.0,0.0,0.0
