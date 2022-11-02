@@ -1,5 +1,5 @@
 # coding=utf-8
-import pickle
+import copy
 import dash
 import joblib
 # import torch
@@ -18,12 +18,15 @@ import branca.colormap as cm
 from fake_useragent import UserAgent
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderUnavailable
+from sklearn.model_selection import train_test_split
+from neural_net import get_percentage_off
+import dash_bootstrap_components as dbc
 
 
 def select_regions_with_nr_samples(data, nr_samples_threshold):
     """
     Returns data with regions where the number of samples for each region is greater than threshold. This to get some
-    statistical significance when plotting in box plot, and to clean up the plot a little bit.
+    statistical significance when plotting in box plot, and to clean up the plot a bit.
 
     :param data: pandas data frame
     :param nr_samples_threshold: threshold which decides which regions to keep
@@ -77,10 +80,34 @@ def use_neural_net_model(x, path_model="nn_model.pkl"):
 
 def use_random_forest_model(x, path_model="random_forest_model.joblib"):
     model = joblib.load(path_model)
-    prediction = model.predict(x)[0]
-    predicted_price = round(prediction[0])
-    predicted_rent = round(prediction[1])
+    prediction = model.predict(x)
+    predicted_price = np.round(prediction[:, 0])
+    predicted_rent = np.round(prediction[:, 1])
     return predicted_price, predicted_rent
+
+
+def find_similar_listings(x, postcode):
+    # find listings in same region with same number of rooms and ish same square meter.
+
+    apartment_data = copy.deepcopy(data)
+    apartment_data = apartment_data.reset_index()
+
+    y = apartment_data[["final_price", "rent_month"]]
+    X = apartment_data.drop(columns=["final_price", "rent_month"])
+    # important to have same random state as when trained the model
+    # so that no training samples are used here for testing.
+    _, X_test, _, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    nr_rooms = x[1]
+    nr_square_m = x[0]
+    nr_room_options = [nr_rooms - 1 if nr_rooms > 2 else 1, nr_rooms, nr_rooms + 1]
+    similar_listings = X_test[
+        (X_test["post_code"] == postcode) & X_test["nr_rooms"].isin(nr_room_options)]
+    if similar_listings.empty:
+        return None, None
+    X_sim_listings = X.iloc[similar_listings.index]
+    y_sim_listings = y.iloc[similar_listings.index]
+
+    return X_sim_listings, y_sim_listings
 
 
 locale.setlocale(locale.LC_ALL, 'sv_SE.utf8')
@@ -278,17 +305,34 @@ def update_charts(object_type):
      State("address", "value")], prevent_initial_call=True
 )
 def predict_price(n_clicks, square_meters, number_rooms, address):
-    latitude, longitude, _ = get_long_lat(address)
+    latitude, longitude, post_code = get_long_lat(address)
     x = np.array([square_meters, number_rooms, latitude, longitude])
+
+    # No need to scale for random forest regression
     # std_scaler = pickle.load(open("standard_scaler.pkl", "rb"))
     # x_scaled = std_scaler.transform(x.reshape(1, -1))
 
     price_prediction, rent_prediction = use_random_forest_model(x.reshape(1, -1))
-    # TODO: maybe test on similar listings as test and see how much the prediction is off?
-    output_string = f"The predicted price is {price_prediction} kr and the predicted average rent is " \
-                    f"{rent_prediction} kr. The average predicted percentage off on listings in this area is"
+
+    X_similar_listings, y_similar_listings = find_similar_listings(x, post_code)
+    if X_similar_listings is None:
+        output_similar_listings = "No similar listings could be found."
+    else:
+        x_similar_listings = X_similar_listings[["sqr_meter", "nr_rooms", "latitude", "longitude"]].values
+
+        price_prediction_sim_listings, rent_prediction_sim_listings = use_random_forest_model(x_similar_listings)
+
+        price_percentage_off_similar_listings = round(get_percentage_off(y_similar_listings["final_price"].values,
+                                                                         price_prediction_sim_listings).mean(axis=0), 1)
+        rent_percentage_off = round(get_percentage_off(y_similar_listings["rent_month"].values,
+                                                       rent_prediction_sim_listings).mean(axis=0), 1)
+        output_similar_listings = "The predicted price percentage off on similar listings in this area is " \
+                                  f"{price_percentage_off_similar_listings} and {rent_percentage_off} for rent."
+
+    output_string = f"The predicted price is {price_prediction[0]} kr and the predicted rent is " \
+                    f"{rent_prediction[0]} kr. " + output_similar_listings
     return output_string
 
 
 if __name__ == "__main__":
-    application.run(debug=True, host='0.0.0.0', port=80)
+    application.run(debug=False, host='0.0.0.0', port=80)
