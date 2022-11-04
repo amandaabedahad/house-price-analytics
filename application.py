@@ -284,7 +284,6 @@ app.layout = html.Div(
                                          dcc.Slider(
                                              id="square-meters",
                                              min=10,
-                                             max=500,
                                              value=50,
                                              step=1,
                                              marks={
@@ -294,7 +293,7 @@ app.layout = html.Div(
                                                  }
                                                  for sqrm in square_meter_slide
                                              },
-                                             tooltip={'always_visible': True}
+                                             tooltip={'always_visible': True, 'placement': 'bottom'}
                                          ),
                                          html.P(
                                              className="slider-text",
@@ -313,15 +312,13 @@ app.layout = html.Div(
                                                  }
                                                  for nr in nr_rooms_slide
                                              },
-                                             tooltip={'always_visible': True}
+                                             tooltip={'always_visible': True, 'placement': 'bottom'}
                                          ),
                                          html.P(
                                              className="slider-text",
-                                             children="Input address:",
+                                             children="Provide address of listing:",
                                          ),
-                                         # dcc.Input(id="square-meters", type="number", placeholder="square meters"),
-                                         # dcc.Input(id="number-rooms", type="number", placeholder="number of rooms"),
-                                         dcc.Input(id="address", type="text", placeholder="address"),
+                                         dcc.Input(id="address", type="text", placeholder="address", className="text-input"),
                                          html.Button('Predict price', id="submit-button", n_clicks=0,
                                                      className="button"),
                                          html.P(id="prediction-output"),
@@ -336,7 +333,8 @@ app.layout = html.Div(
 
                                                       dcc.Graph(figure=fig_bar_plot,
                                                                 id="bar_plot"),
-                                                  ]),
+                                                  ]
+                                                  ),
                                          ], className="center"
                                ),
                       ]

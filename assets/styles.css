@@ -147,6 +147,12 @@ input[type="button"] {
     box-sizing: border-box;
 }
 
+.text-input {
+    background-color: #1e2633;
+    color: #7fafdf;
+    margin-bottom: 1rem !important;
+    border: 1px solid #bbb;
+}
 .center{
     margin: 25px auto;
 }
