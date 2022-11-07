@@ -91,7 +91,7 @@ def use_random_forest_model(x, path_model="random_forest_model.joblib"):
 def find_similar_listings(x, postcode):
     # find listings in same region with same number of rooms and ish same square meter.
 
-    apartment_data = copy.deepcopy(data)
+    apartment_data = copy.deepcopy(data_apartments)
     apartment_data = apartment_data.reset_index()
 
     y = apartment_data[["final_price", "rent_month"]]
@@ -148,18 +148,18 @@ shp_file = "geospatial_data_polygons_areas/JUR_PRIMÄROMRÅDEN_XU_region.shp"
 geo_data_raw = gpd.read_file(shp_file)
 geo_data = geo_data_raw[["PRIMÄROMRÅ", "PRIMÄRNAMN", "geometry"]]
 geo_data = geo_data.rename(columns={"PRIMÄRNAMN": "region"})
-data = data_all.dropna(subset=["latitude", "longitude", "price_sqr_m"])
+data_nan_dropped = data_all.dropna(subset=["latitude", "longitude", "price_sqr_m"])
 
 # Create map to include in DASH-app
 ma = folium.Map(
-    location=[data["latitude"].mean(), data["longitude"].mean()],
+    location=[data_nan_dropped["latitude"].mean(), data_nan_dropped["longitude"].mean()],
     zoom_start=7)
 
 # TODO: delete these hardcoded values only decides zoom on map
 ma.fit_bounds([(57.652402, 11.914561), (57.777214, 12.074102)])
-data = data[data["housing_type"] == "Lägenhet"]
+data_apartments = data_nan_dropped[data_nan_dropped["housing_type"] == "Lägenhet"]
 # Group data by region
-data_grouped_by_region = data.groupby(["region"], as_index=False).mean()
+data_grouped_by_region = data_apartments.groupby(["region"], as_index=False).mean()
 
 # Merge the grouped data with the polygon data --> yields the average data for each polygon (region)
 geo_data_map = geo_data.merge(data_grouped_by_region[["price_sqr_m", "region"]], on="region", how="left")
@@ -203,13 +203,13 @@ folium.LayerControl().add_to(ma)
 ma.save('map_city.html')
 
 # These dataframes are used for plots in the dash app
-data_grouped_by_rooms = data.groupby(["nr_rooms"]).mean()
+data_grouped_by_rooms = data_apartments.groupby(["nr_rooms"]).mean()
 fig_scatter = px.scatter(data_grouped_by_rooms, y="final_price",
                          title="Average price for different number of rooms",
                          labels={"final_price": "Average sold price",
                                  "nr_rooms": "Number of rooms"})
 
-data_grouped_by_date = data.groupby(["sold_date"]).mean()
+data_grouped_by_date = data_apartments.groupby(["sold_date"]).mean()
 fig_prices_over_time = px.line(data_frame=data_grouped_by_date, y="final_price", title="Average price over time",
                                labels={"final_price": "Average sold price",
                                        "sold_date": "Sold date"})
@@ -217,7 +217,7 @@ fig_prices_over_time = px.line(data_frame=data_grouped_by_date, y="final_price",
 fig_bar_plot = px.histogram(data_frame=data_all, x="housing_type", labels={"housing_type": "Housing type",
                                                                            "count": "Number of listings"})
 
-fig_box_plot = px.box(data_frame=select_regions_with_nr_samples(data, nr_samples_threshold=10),
+fig_box_plot = px.box(data_frame=select_regions_with_nr_samples(data_apartments, nr_samples_threshold=10),
                       x="price_sqr_m", y="region", labels={"price_sqr_m": "Price per square meter",
                                                            "region": "Region"})
 prettify_plots(fig_bar_plot)
@@ -369,7 +369,7 @@ app.layout = html.Div(
                 dcc.Dropdown(
                     id="object-filter",
                     options=[
-                        {"label": object_type, "value": object_type} for object_type in data.housing_type.unique()
+                        {"label": object_type, "value": object_type} for object_type in data_nan_dropped.housing_type.unique()
                     ],
                     value="Lägenhet",
                     multi=True
@@ -415,7 +415,7 @@ def update_charts(object_type):
                                      title="Average price over time",
                                      labels={"final_price": "Average sold price",
                                              "sold_date": "Sold date"})
-    price_over_time_figure.update_layout(transition_duration=500)
+    #price_over_time_figure.update_layout(transition_duration=500)
     prettify_plots(price_over_time_figure)
     return price_over_time_figure
 
