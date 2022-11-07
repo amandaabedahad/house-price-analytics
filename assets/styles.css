@@ -39,6 +39,9 @@ body {
     margin-bottom: 24px;
 }
 
+.boxplot-container {
+    height: 80rem;
+}
 
 @media (min-width: 1251px) {
     /*For desktop*/
@@ -164,4 +167,26 @@ input[type="button"] {
   .plot{
     width: 100%
   }
+}
+
+.highlight-text-container {
+    flex-grow: 1;
+    display: block;
+    flex-direction: column;
+    justify-content: right;
+    height: 100%;
+    width: 100%;
+}
+
+.important-text {
+    color: #2cfec1;
+
+}
+
+blockquote {
+    border-left: 4px lightgrey solid;
+    padding-left: 1rem;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    margin-left: 0;
 }

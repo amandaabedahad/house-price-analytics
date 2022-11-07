@@ -214,15 +214,18 @@ fig_prices_over_time = px.line(data_frame=data_grouped_by_date, y="final_price",
                                labels={"final_price": "Average sold price",
                                        "sold_date": "Sold date"})
 
-fig_bar_plot = px.bar(data_frame=data_all,
-                      x="housing_type")
+fig_bar_plot = px.histogram(data_frame=data_all, x="housing_type", labels={"housing_type": "Housing type",
+                                                                           "count": "Number of listings"})
 
-fig_box_plot = px.box(data_frame=select_regions_with_nr_samples(data, nr_samples_threshold=20),
-                      x="region", y="price_sqr_m")
+fig_box_plot = px.box(data_frame=select_regions_with_nr_samples(data, nr_samples_threshold=10),
+                      x="price_sqr_m", y="region", labels={"price_sqr_m": "Price per square meter",
+                                                           "region": "Region"})
 prettify_plots(fig_bar_plot)
 prettify_plots(fig_scatter)
 prettify_plots(fig_prices_over_time)
 prettify_plots(fig_box_plot)
+
+loading_style = {'position': 'absolute', 'align-self': 'center'}
 
 app.title = "Hemnet Analytics"
 
@@ -231,124 +234,147 @@ nr_rooms_slide = list(np.linspace(1, 10, 10))
 
 app.layout = html.Div(
     children=[
-        html.Div(
-            [
-                html.H4("HEMNET ANALYTICS AND INSIGHTS", className="app__header__title"),
-                html.P(
-                    "This dashboard aims to provide useful information and insights of the "
-                    "objects sold in Gothenburg, Sweden. This is an extension to information "
-                    "already presented on the Swedish house market - www.hemnet.se.",
-                    className="app__header__title--grey",
-                ),
-            ],
+        html.Div([
+            html.H4("HEMNET ANALYTICS AND INSIGHTS", className="app__header__title"),
+            html.P(
+                "This dashboard aims to provide useful information and insights of the "
+                "objects sold in Gothenburg, Sweden. This is an extension to information "
+                "already presented on the Swedish house market - www.hemnet.se.",
+                className="app__header__title--grey",
+            ),
+        ],
             className="app__header__desc",
         ),
         html.Div(
             id="app-container",
-            children=[html.Div(id="left-column",
-                               children=[
-                                   html.Div(
-                                       children=[html.H6("Pricing situation in Gothenburg", className="graph__title"),
-                                                 html.P(
-                                                     "The interactive map presents how the average cost per square "
-                                                     "meter "
-                                                     "varies in "
-                                                     "different regions in Gothenburg. We can "
-                                                     "observe some "
-                                                     "regions where the price is noticeably higher - close to the "
-                                                     "ocean and "
-                                                     "in the city")],
-                                   ),
-                                   html.Div(id="heatmap-container",
-                                            children=[
-                                                html.Iframe(id='map1', srcDoc=open('map_city.html', 'r').read(),
-                                                            height='80%', width='100%'),
-                                                html.P(
-                                                    "For a more in depth visualisation of the pricing situation, continue to the box plot, "
-                                                    "presented at the bottom of this page. ")
-                                            ])
-                               ]
-                               ),
-                      html.Div(id="predict_house_price_container",
-                               children=[html.H2("Predict house price using ML", className="graph__title"),
-                                         html.P(
-                                             "As of today, Hemnet provides house price prediction as a beta service on their"
-                                             " webpage. This is however limited only to apartments in Stockholm, Sweden. "
-                                             "Similar functionality is here presented for Gothenburg.  The following parameters "
-                                             "will be used to predict the sold price for apartments, "
-                                             "using ML"),
-                                         html.P(
-                                             className="slider-text",
-                                             children="Drag the slider to change the nr of square meters:",
-                                         ),
-                                         dcc.Slider(
-                                             id="square-meters",
-                                             min=10,
-                                             value=50,
-                                             step=1,
-                                             marks={
-                                                 str(sqrm): {
-                                                     "label": str(sqrm),
-                                                     "style": {"color": "#7fafdf"},
-                                                 }
-                                                 for sqrm in square_meter_slide
-                                             },
-                                             tooltip={'always_visible': True, 'placement': 'bottom'}
-                                         ),
-                                         html.P(
-                                             className="slider-text",
-                                             children="Drag the slider to change the nr of rooms:",
-                                         ),
-                                         dcc.Slider(
-                                             id="number-rooms",
-                                             min=1,
-                                             max=10,
-                                             step=1,
-                                             value=2,
-                                             marks={
-                                                 str(nr): {
-                                                     "label": str(nr),
-                                                     "style": {"color": "#7fafdf"},
-                                                 }
-                                                 for nr in nr_rooms_slide
-                                             },
-                                             tooltip={'always_visible': True, 'placement': 'bottom'}
-                                         ),
-                                         html.P(
-                                             className="slider-text",
-                                             children="Provide address of listing:",
-                                         ),
-                                         dcc.Input(id="address", type="text", placeholder="address", className="text-input"),
-                                         html.Button('Predict price', id="submit-button", n_clicks=0,
-                                                     className="button"),
-                                         html.P(id="prediction-output"),
-                                         html.Div(id="graph-container",
-                                                  children=[
-                                                      html.H6("Overview of the data set", className="graph__title"),
-                                                      html.P(
-                                                          "Majority of listings are sold apartments. "
-                                                          "Meaningful insights can only be drawn with a data set with sufficient number of "
-                                                          "samples, which is why the following analytics are presented for apartments only."
-                                                          "As more data is added to the data set, other housing types will be analysed"),
+            children=[
+                html.Div(
+                    id="left-column",
+                    children=[
+                        html.Div(
+                            children=[
+                                html.H6("Pricing situation in Gothenburg", className="graph__title"),
+                                html.P(
+                                    "The interactive map presents how the average cost per square "
+                                    "meter "
+                                    "varies in "
+                                    "different regions in Gothenburg. We can "
+                                    "observe some "
+                                    "regions where the price is noticeably higher - close to the "
+                                    "ocean and "
+                                    "in the city")
+                            ],
+                        ),
+                        html.Div(
+                            id="heatmap-container",
+                            children=[
+                                html.Iframe(id='map1', srcDoc=open('map_city.html', 'r').read(),
+                                            height='80%', width='100%'),
+                                html.P(
+                                    "For a more in depth visualisation of the pricing situation, continue to the box "
+                                    "plot, "
+                                    "presented at the bottom of this page. ")
+                            ]
+                        )
+                    ]
+                ),
+                html.Div(
+                    id="predict_house_price_container",
+                    children=[
+                        html.H2("Predict house price using ML", className="graph__title"),
+                        html.P(
+                            "As of today, Hemnet provides house price prediction as a beta service on their"
+                            " webpage. This is however limited only to apartments in Stockholm, Sweden. "
+                            "Similar functionality is here presented for Gothenburg.  The following "
+                            "parameters "
+                            "will be used to predict the sold price for apartments, "
+                            "using ML"),
+                        html.P(
+                            className="slider-text",
+                            children="Drag the slider to change the nr of square meters:",
+                        ),
+                        dcc.Slider(
+                            id="square-meters",
+                            min=10,
+                            value=50,
+                            step=1,
+                            marks={
+                                str(sqrm): {
+                                    "label": str(sqrm),
+                                    "style": {"color": "#7fafdf"},
+                                }
+                                for sqrm in square_meter_slide
+                            },
+                            tooltip={'always_visible': True, 'placement': 'bottom'}
+                        ),
+                        html.P(
+                            className="slider-text",
+                            children="Drag the slider to change the nr of rooms:",
+                        ),
+                        dcc.Slider(
+                            id="number-rooms",
+                            min=1,
+                            max=10,
+                            step=1,
+                            value=2,
+                            marks={
+                                str(nr): {
+                                    "label": str(nr),
+                                    "style": {"color": "#7fafdf"},
+                                }
+                                for nr in nr_rooms_slide
+                            },
+                            tooltip={'always_visible': True, 'placement': 'bottom'}
+                        ),
+                        html.P(
+                            className="slider-text",
+                            children="Provide address of listing:",
+                        ),
+                        dcc.Input(id="address", type="text", placeholder="address",
+                                  className="text-input"),
+                        html.Button('Predict price', id="submit-button", n_clicks=0,
+                                    className="button"),
+                        html.Div(
+                            [
+                                html.P(id="prediction-output"),
+                                dcc.Loading(
+                                    id="loading",
+                                    type="circle",
+                                    parent_style=loading_style
+                                )
+                            ] , className='blockquote'
+                        ),
+                        html.Div(
+                            id="graph-container",
+                            children=[
+                                html.H6("Overview of the data set", className="graph__title"),
+                                html.P(
+                                    "Majority of listings are sold apartments. "
+                                    "Meaningful insights can only be drawn with a data set with sufficient number of "
+                                    "samples, which is why the following analytics are presented for apartments only."
+                                    "As more data is added to the data set, other housing types will be analysed"),
 
-                                                      dcc.Graph(figure=fig_bar_plot,
-                                                                id="bar_plot"),
-                                                  ]
-                                                  ),
-                                         ], className="center"
-                               ),
-                      ]
+                                dcc.Graph(figure=fig_bar_plot,
+                                          id="bar_plot"),
+                            ]
+                        ),
+                    ], className="center"
+                ),
+            ]
         ),
         html.Div(
-            children=[html.H2("Insights from data"),
-                      html.P("Select one or several listing types"),
-                      dcc.Dropdown(
-                          id="object-filter",
-                          options=[{"label": object_type, "value": object_type} for object_type in
-                                   data.housing_type.unique()],
-                          value="Lägenhet",
-                          multi=True
-                      )]
+            children=[
+                html.H2("Insights from data",  className="graph__title"),
+                html.P("Select one or several listing types"),
+                dcc.Dropdown(
+                    id="object-filter",
+                    options=[
+                        {"label": object_type, "value": object_type} for object_type in data.housing_type.unique()
+                    ],
+                    value="Lägenhet",
+                    multi=True
+                )
+            ]
         ),
         html.Div(
             [
@@ -356,12 +382,17 @@ app.layout = html.Div(
                     children=[dcc.Graph(figure=fig_scatter, className='plot', id="price-per-room"),
                               dcc.Graph(id="price-over-time", figure=fig_prices_over_time, className="plot")],
                     className="parent"
-                )]
+                )
+            ]
         ),
         html.Div(
-            children=[html.H3("In depth view of the pricing situation"),
-                      html.P("how to read plot"),
-                      dcc.Graph(figure=fig_box_plot, id="box_plot")]
+            children=[html.H2("In depth view of the pricing situation", className="graph__title"),
+                      html.P("The box plot visualizes the spread of a data group using statistical metrics - more "
+                             "specifically the median and quartiles. For example, someone who wants to buy an "
+                             "apartment in Agnesberg can expect to pay a median of ~23k per square meter, where most "
+                             "listings lay inbetween ~20k-~26k. In addition, there exist listings with an average of "
+                             "18k per square meter, up to 35k per square meter."),
+                      dcc.Graph(figure=fig_box_plot, id="box_plot", className="boxplot-container")]
         ),
     ],
     id="root",
@@ -384,19 +415,21 @@ def update_charts(object_type):
                                      title="Average price over time",
                                      labels={"final_price": "Average sold price",
                                              "sold_date": "Sold date"})
-    prettify_plots(price_over_time_figure)
     price_over_time_figure.update_layout(transition_duration=500)
+    prettify_plots(price_over_time_figure)
     return price_over_time_figure
 
 
 @app.callback(
-    Output("prediction-output", "children"),
+    [Output("prediction-output", "children"),
+     Output('loading', 'parent_style')],
     [Input("submit-button", "n_clicks"),
      State("square-meters", "value"),
      State("number-rooms", "value"),
      State("address", "value")], prevent_initial_call=True
 )
 def predict_price(n_clicks, square_meters, number_rooms, address):
+    new_loading_style = loading_style
     latitude, longitude, post_code = get_long_lat(address)
     x = np.array([square_meters, number_rooms, latitude, longitude])
 
@@ -419,11 +452,11 @@ def predict_price(n_clicks, square_meters, number_rooms, address):
         rent_percentage_off = round(get_percentage_off(y_similar_listings["rent_month"].values,
                                                        rent_prediction_sim_listings).mean(axis=0), 1)
         output_similar_listings = "The predicted price percentage off on similar listings in this area is " \
-                                  f"{price_percentage_off_similar_listings} and {rent_percentage_off} for rent."
+                                  f"{price_percentage_off_similar_listings} and {rent_percentage_off} for the fee."
 
-    output_string = f"The predicted price is {price_prediction[0]} kr and the predicted rent is " \
-                    f"{rent_prediction[0]} kr. " + output_similar_listings
-    return output_string
+    output_string = f"Value indication sold price:  {price_prediction[0]} kr. " \
+                    f"Value indication monthly fee: {rent_prediction[0]} kr. " + output_similar_listings
+    return output_string, new_loading_style
 
 
 if __name__ == "__main__":
