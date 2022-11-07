@@ -61,10 +61,10 @@ def random_forest_regressor(X, y, logger=None):
 
     Tuned_RandForest = GridSearchCV(estimator=RandForest, param_grid=param_grid, scoring='neg_root_mean_squared_error',
                                     cv=5)
-
     Tuned_RandForest.fit(X_train, y_train)
+    best_estimator = Tuned_RandForest.best_estimator_
     print(Tuned_RandForest.best_params_)
-    y_predict = Tuned_RandForest.predict(X_test)
+    y_predict = best_estimator.predict(X_test)
     # esti.plot_learning_curve(Tuned_RandForest, X, y)
     plt.show()
     print(np.sqrt(mean_squared_error(y_test, y_predict)))
@@ -73,7 +73,7 @@ def random_forest_regressor(X, y, logger=None):
     if logger:
         logger.info(f"Mean percentage off on test set is: {mean_percentage_off_test_set}")
         logger.info(f"The parameters of the grid search were {Tuned_RandForest.best_params_}")
-    return Tuned_RandForest
+    return best_estimator
 
 
 def update_ml_model(hemnet_house_data, logger):

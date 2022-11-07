@@ -43,7 +43,7 @@ def get_long_lat(sample, pbar=None,
         "User-Agent": ua.random
     }
 
-    geolocator = Nominatim(user_agent=str(header))
+    geolocator = Nominatim(user_agent="email")
     location = do_geocode(address, geolocator)
     # location = geolocator.geocode(address)
     if pbar is not None:
