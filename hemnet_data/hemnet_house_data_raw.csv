@@ -1,4 +1,36 @@
 address,housing_type,region,city,sqr_meter,nr_rooms,rent_month,final_price,sold_date,price_increase,price_sqr_m,land_area,other_srq
+Övre Husargatan 17,Lägenhet,Linné,Göteborgs kommun,92.0,3.0,4870.0,6030000.0,2022-11-06,7.0,65543.0,0.0,0.0
+Nordenskiöldsgatan 13,Lägenhet,Linné,Göteborgs kommun,75.0,3.0,3758.0,5000000.0,2022-11-06,14.0,66667.0,0.0,0.0
+Kapellplatsen 1A  /  Erik Dahlbergsgatan 37B,Lägenhet,Vasastaden,Göteborgs kommun,50.0,2.0,3180.0,4300000.0,2022-11-06,-4.0,86000.0,0.0,0.0
+Hammarliden 22,Villa,Johanneberg,Göteborgs kommun,148.0,5.0,,9950000.0,2022-11-05,-7.0,67230.0,988.7,60.0
+Munkebäcksgatan 4B,Lägenhet,Kålltorp,Göteborgs kommun,48.0,2.0,2909.0,2200000.0,2022-11-05,2.0,45833.0,0.0,0.0
+Toleredsgatan 20 C,Lägenhet,Slätta damm - Centrala Hisingen,Göteborgs kommun,64.0,3.0,4951.0,1875000.0,2022-11-05,-6.0,29297.0,0.0,0.0
+Norumsgärde 113,Radhus,Tuve,Göteborgs kommun,108.0,5.0,,4150000.0,2022-11-05,-1.0,38426.0,159.7,42.0
+Astris Gata 86,Lägenhet,Eriksberg,Göteborgs kommun,77.0,3.0,3527.0,3750000.0,2022-11-05,0.0,48701.0,0.0,0.0
+Konsertgatan 13,Lägenhet,Kaverös,Göteborgs kommun,59.5,2.0,2532.0,2200000.0,2022-11-04,,36975.0,0.0,0.0
+Beryllgatan 25,Lägenhet,Tynnered,Göteborgs kommun,67.5,2.0,4302.0,2230000.0,2022-11-04,6.0,33037.0,0.0,0.0
+Sörbacken stuga 62,Fritidshus,GUNNILSE,Göteborgs kommun,35.0,2.0,,420000.0,2022-11-04,-7.0,12000.0,0.0,0.0
+Norra Skeppspromenaden 6,Lägenhet,Eriksberg,Göteborgs kommun,75.0,3.0,4214.0,3800000.0,2022-11-04,-2.0,50667.0,0.0,0.0
+Monsungatan 55,Lägenhet,Eriksberg,Göteborgs kommun,61.0,2.0,3784.0,3500000.0,2022-11-04,0.0,57377.0,0.0,0.0
+Kvillegatan 35,Lägenhet,Centrala Hisingen,Göteborgs kommun,40.0,1.5,2610.0,2180000.0,2022-11-04,4.0,54500.0,0.0,0.0
+Turkosgatan 2,Lägenhet,Tynnered,Göteborgs kommun,84.5,4.0,5589.0,2400000.0,2022-11-04,-4.0,28402.0,0.0,0.0
+Toredalsgatan 96,Radhus,Tolered,Göteborgs kommun,85.0,5.0,,4410000.0,2022-11-04,-2.0,51882.0,178.3,35.0
+Doktor Hjorts Gata 2B,Lägenhet,Södra Guldheden,Göteborgs kommun,53.5,1.5,2587.0,2500000.0,2022-11-04,0.0,46729.0,0.0,0.0
+Tunnlandsgatan 20,Lägenhet,Kaverös,Göteborgs kommun,59.5,2.0,2532.0,2210000.0,2022-11-04,3.0,37143.0,0.0,0.0
+Virvelvindsgatan 20A,Lägenhet,Centrala Hisingen,Göteborgs kommun,34.0,1.0,2278.0,1200000.0,2022-11-04,-7.0,35294.0,0.0,0.0
+Ebbe Lieberathsgatan 14B,Lägenhet,Johanneberg - Almedal,Göteborgs kommun,92.0,4.0,4364.0,4600000.0,2022-11-04,-6.0,50000.0,0.0,0.0
+Gröna gatan 49,Lägenhet,Majorna,Göteborgs kommun,60.0,2.0,4461.0,2400000.0,2022-11-04,-1.0,40000.0,0.0,0.0
+Beryllgatan 51,Lägenhet,Tynnered,Göteborgs kommun,82.9,3.0,5200.0,2700000.0,2022-11-04,,32569.0,0.0,0.0
+Svindalsvägen 105,Villa,Askim,Göteborgs kommun,115.0,5.0,,5800000.0,2022-11-04,6.0,50435.0,1682.0,73.0
+Lilla Ingebäcksvägen 16B,Lägenhet,Hisings Kärra,Göteborgs kommun,77.0,4.0,4810.0,2525000.0,2022-11-04,-3.0,32792.0,0.0,0.0
+Sunnanvindsgatan 2C,Lägenhet,Centrala Hisingen,Göteborgs kommun,46.4,2.0,3251.0,1775000.0,2022-11-04,11.0,38254.0,0.0,0.0
+Andra Långgatan 7 A,Lägenhet,Linnéstaden,Göteborgs kommun,114.0,3.5,6696.0,5450000.0,2022-11-04,-5.0,47807.0,0.0,0.0
+Toleredsgatan 9A,Lägenhet,Tolered,Göteborgs kommun,67.5,3.0,3985.0,1800000.0,2022-11-04,-10.0,26667.0,0.0,0.0
+Smörgatan 25,Lägenhet,Kallebäck,Göteborgs kommun,106.0,5.0,5947.0,4487000.0,2022-11-03,-4.0,42330.0,0.0,0.0
+Arvid Lindmansgatan 17B,Lägenhet,Tolered,Göteborgs kommun,63.0,3.0,3721.0,1900000.0,2022-11-01,-5.0,30159.0,0.0,0.0
+Sylvestergatan 5,Lägenhet,Nedre Johanneberg,Göteborgs kommun,73.0,2.5,3361.0,5250000.0,2022-11-01,3.0,71918.0,0.0,0.0
+Barrskogsgatan 9C,Lägenhet,Örgryte,Göteborgs kommun,64.0,2.0,3575.0,2400000.0,2022-10-31,-4.0,37500.0,0.0,0.0
+Hjällbogärdet 46,Lägenhet,Angered,Göteborgs kommun,70.0,3.0,4960.0,1260000.0,2022-10-29,0.0,18000.0,0.0,0.0
 Guldringen 11,Lägenhet,Tynnered,Göteborgs kommun,64.0,2.0,4506.0,1550000.0,2022-11-03,3.0,24219.0,0.0,0.0
 Fyrmästaregången 20,Lägenhet,Masthugget,Göteborgs kommun,38.5,2.0,2119.0,2200000.0,2022-11-03,-2.0,57143.0,0.0,0.0
 Plantagegatan 9B,Lägenhet,Linné,Göteborgs kommun,61.7,2.0,4167.0,3200000.0,2022-11-03,-5.0,51864.0,0.0,0.0
