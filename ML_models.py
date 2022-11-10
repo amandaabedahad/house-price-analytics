@@ -13,6 +13,7 @@ from sklearn.model_selection import GridSearchCV
 # import scikitplot.estimators as esti
 import numpy as np
 from neural_net import get_percentage_off
+from create_sql_table import *
 
 
 def plot_corr_heatmap(df):
@@ -76,13 +77,19 @@ def random_forest_regressor(X, y, logger=None):
     return best_estimator
 
 
+def prep_data_ml(data_all):
+    apartment_data = data_all[data_all["housing_type"] == "Lägenhet"]
+    data_filtered = apartment_data[
+        ["sqr_meter", "nr_rooms", "final_price", "latitude", "longitude", "rent_month"]].dropna()
+    data_final = data_filtered.drop(data_filtered[data_filtered["rent_month"] == 0].index, axis=0)
+    return data_final
+
+
 def update_ml_model(hemnet_house_data, logger):
     # Only look at apartments at the moment
     logger.info("updating machine learning model: random forest")
-    filtered_data = hemnet_house_data[hemnet_house_data["housing_type"] == "Lägenhet"]
-    data = filtered_data[["sqr_meter", "nr_rooms", "final_price", "latitude", "longitude", "rent_month"]].dropna()
-    data = data.drop(filtered_data[filtered_data["rent_month"] == 0].index, axis=0)
 
+    data = prep_data_ml(hemnet_house_data)
     y = data[["final_price", "rent_month"]]
     X = data.drop(columns=["final_price", "rent_month"])
     model = random_forest_regressor(X, y, logger)
@@ -92,13 +99,17 @@ def update_ml_model(hemnet_house_data, logger):
 
 
 if __name__ == "__main__":
-    hemnet_house_data = pd.read_csv("hemnet_data/hemnet_house_data_processed.csv")
-    hemnet_house_data.plot(kind="scatter", x="latitude", y="longitude", alpha=0.4, c="final_price",
-                           cmap=plt.get_cmap("jet"), colorbar=True, sharex=False)
+    connection = create_server_connection(database_connection_settings["host_name"],
+                                          database_connection_settings["user_name"],
+                                          database_connection_settings["password"],
+                                          database_connection_settings["db"])
+
+    # Read hemnet data and geo data
+    data_all = get_pandas_from_database(connection, "processed_data")
+    data_all.plot(kind="scatter", x="latitude", y="longitude", alpha=0.4, c="final_price",
+                  cmap=plt.get_cmap("jet"), colorbar=True, sharex=False)
     # plt.show()
-    filtered_data = hemnet_house_data[hemnet_house_data["housing_type"] == "Lägenhet"]
-    data = filtered_data[["sqr_meter", "nr_rooms", "final_price", "latitude", "longitude", "rent_month"]].dropna()
-    data = data.drop(filtered_data[filtered_data["rent_month"] == 0].index, axis=0)
+    data = prep_data_ml(data_all)
     y = data[["final_price", "rent_month"]]
     X = data.drop(columns=["final_price", "rent_month"])
 
