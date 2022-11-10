@@ -45,13 +45,13 @@ def get_long_lat(sample, pbar=None,
 
     geolocator = Nominatim(user_agent="email")
     location = do_geocode(address, geolocator)
-    # location = geolocator.geocode(address)
     if pbar is not None:
         pbar.update(1)
     if location is None:
         return None, None, None
-    address_info = location.address.split(',')
-    post_code = address_info[-2]
+    post_code = re.search("\d{3} \d{2}", location.address)
+    if post_code is not None:
+        post_code = post_code[0]
     return location.latitude, location.longitude, post_code
 
 
