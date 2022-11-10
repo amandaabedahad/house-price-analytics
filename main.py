@@ -1,6 +1,8 @@
 """
 Main script that scrapes hemnet of data, and processes it into wanted format.
 """
+import copy
+# -*- coding: utf-8 -*-
 import os
 from os.path import exists
 from tqdm import tqdm
@@ -10,6 +12,7 @@ import data_process_functions
 import logging
 import re
 from ML_models import update_ml_model
+from create_sql_table import *
 
 
 def get_nr_new_samples_since_last_ml_update(logger_path, nr_listings_trigger_ml_update, target_word):
@@ -30,9 +33,12 @@ def get_nr_new_samples_since_last_ml_update(logger_path, nr_listings_trigger_ml_
     return sum_new_listings, False
 
 
+connection = create_server_connection(database_connection_settings["host_name"],
+                                      database_connection_settings["user_name"],
+                                      database_connection_settings["password"],
+                                      database_connection_settings["db"])
+
 if __name__ == "__main__":
-    path_to_hemnet_data_raw = "hemnet_data/hemnet_house_data_raw.csv"
-    path_to_hemnet_data_processed = "hemnet_data/hemnet_house_data_processed.csv"
     path_shp_file = "geospatial_data_polygons_areas/JUR_PRIMÄROMRÅDEN_XU_region.shp"
 
     path_log_file = "logs/logging_file.txt"
@@ -43,38 +49,40 @@ if __name__ == "__main__":
                                                                                          '- %(message)s')
     my_logger = logging.getLogger("my_logger")
     my_logger.info("\n Main script started")
-    raw_hemnet_data = main_scrape_hemnet(path_to_hemnet_data_raw, my_logger)
-    nr_samples_raw_data = raw_hemnet_data.shape[0]
-    if not exists(path_to_hemnet_data_processed):
-        data_processed = None
-        nr_samples_data_processed = 0
-    else:
-        data_processed = pd.read_csv(path_to_hemnet_data_processed)
-        nr_samples_data_processed = data_processed.shape[0]
 
-    diff_raw_processed = nr_samples_raw_data - nr_samples_data_processed
+    hemnet_data_raw = get_pandas_from_database(connection, "SELECT * from raw_data ORDER BY sold_date DESC")
 
-    if diff_raw_processed == 0:
-        print('No new samples in dataset raw compared to processed')
+    new_listings_raw_data = main_scrape_hemnet(hemnet_data_raw, my_logger)
+
+    if new_listings_raw_data.empty:
+        print('No new samples found when scraped web page')
         my_logger.info("0 new listings that needs to be processed - script exited")
+        connection.close()
         exit()
-    my_logger.info(f"{diff_raw_processed} new listings that needs to be processed")
-    pbar = tqdm(total=diff_raw_processed)
-    print(f'{diff_raw_processed} new samples to be processed')
 
-    new_data = raw_hemnet_data.iloc[:diff_raw_processed].copy()
-    new_data["region"] = new_data["region"].apply(data_process_functions.clean_region_sample)
-    new_data["address"] = new_data["address"].apply(data_process_functions.clean_address_sample)
+    nr_new_samples = new_listings_raw_data.shape[0]
+    data_processed = get_pandas_from_database(connection, "SELECT * from processed_data ORDER BY sold_date DESC")
 
-    location_info = new_data["address"].apply(lambda x: data_process_functions.get_long_lat(x, pbar=pbar))
-    new_data["latitude"], new_data["longitude"], new_data["post_code"] = zip(*location_info)
+    nr_samples_data_processed = data_processed.shape[0]
 
-    processed_new_data = data_process_functions.map_address_to_area(new_data, path_shp_file)
+    my_logger.info(f"{nr_new_samples} new listings that needs to be processed")
+    pbar = tqdm(total=nr_new_samples)
+    print(f'{nr_new_samples} new samples to be processed')
 
-    # We don't want the address mapping to delete/add listings.
-    assert processed_new_data.shape[0] == new_data.shape[0]
+    new_listings_to_be_processed = copy.deepcopy(new_listings_raw_data)
+    new_listings_to_be_processed["region"] = new_listings_to_be_processed["region"].apply(
+        data_process_functions.clean_region_sample)
+    new_listings_to_be_processed["address"] = new_listings_to_be_processed["address"].apply(
+        data_process_functions.clean_address_sample)
 
-    hemnet_data = pd.concat([processed_new_data, data_processed], ignore_index=True)
+    location_info = new_listings_to_be_processed["address"].apply(
+        lambda x: data_process_functions.get_long_lat(x, pbar=pbar))
+    new_listings_to_be_processed["latitude"], new_listings_to_be_processed["longitude"], new_listings_to_be_processed[
+        "post_code"] = zip(*location_info)
+
+    processed_new_data = data_process_functions.map_address_to_area(new_listings_to_be_processed, path_shp_file)
+
+    hemnet_data_processed_all = pd.concat([processed_new_data, data_processed], ignore_index=True)
 
     new_listings_since_last_ml_update, reached_trigger_amount = get_nr_new_samples_since_last_ml_update(
         path_log_file, nr_listings_trigger_ml_update=200, target_word="new listings"
@@ -83,7 +91,11 @@ if __name__ == "__main__":
     my_logger.info(f"{new_listings_since_last_ml_update} listings since last ML-update")
 
     if reached_trigger_amount:
-        update_ml_model(hemnet_data, my_logger)
+        update_ml_model(hemnet_data_processed_all, my_logger)
 
-    hemnet_data.to_csv("hemnet_data/hemnet_house_data_processed.csv", index=False)
+    insert_to_database(connection, new_listings_raw_data, "raw_data")
+    insert_to_database(connection, processed_new_data, "processed_data")
+
     my_logger.info("Data scraping and processing finished.")
+
+    connection.close()
