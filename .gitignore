@@ -2,3 +2,4 @@ hemnet_data
 logs
 not_used
 standard_scaler.pkl
+.env
