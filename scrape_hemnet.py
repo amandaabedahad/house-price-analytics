@@ -33,12 +33,13 @@ def parse_html(row, loaded_hemnet_df):
             '\xa0', ''))
     sold_date_raw = row.find("div", class_="sold-property-listing__price").text.split('\n')[5].strip(' Såld')
 
-    sold_date = str(datetime.strptime(sold_date_raw, "%d %B %Y").date())
+    sold_date = datetime.strptime(sold_date_raw, "%d %B %Y").date()
 
     specific_info_listing = pd.DataFrame.from_dict({"address": address, "sold_date": sold_date,
                                                     "final_price": final_price}, orient="index").T
     # if sold_date, address and final price already included in data --> move on to next listing
-    if (specific_info_listing.values == loaded_hemnet_df[["address", "sold_date", "final_price"]].values).sum(axis=1).max() == 3:
+    if (specific_info_listing.values == loaded_hemnet_df[["address", "sold_date", "final_price"]].values).sum(
+            axis=1).max() == 3:
         return None
     elif housing_type == 'Övrigt':
         return None
@@ -107,18 +108,12 @@ def parse_html(row, loaded_hemnet_df):
     return data_series
 
 
-def main_scrape_hemnet(path_to_hemnet_data, logger):
+def main_scrape_hemnet(loaded_hemnet_data, logger):
     data = {}
     nr_objects = 0
     pbar = tqdm(total=PAGES_TO_SEARCH * HOUSE_CARDS_PER_PAGE)
 
-    if not exists(path_to_hemnet_data):
-        loaded_hemnet_data = None
-        original_nr_objects = 0
-    else:
-        loaded_hemnet_data = pd.read_csv(path_to_hemnet_data)
-        original_nr_objects = loaded_hemnet_data.shape[0]
-
+    original_nr_objects = loaded_hemnet_data.shape[0]
     nr_consecutive_pages_already_documented = 0
 
     for page in range(1, PAGES_TO_SEARCH + 1):
@@ -145,17 +140,16 @@ def main_scrape_hemnet(path_to_hemnet_data, logger):
             data[nr_objects] = data_series
         if nr_consecutive_pages_already_documented == 2:
             pbar.close()
-            print("100 consecutive listings already in file, assume that the remaining listings are also in raw data "
-                  "set. ")
-            logger.info("100 consecutive listings already in file, assume that the remaining listings are also in raw "
-                        "data set.")
+            print("100 consecutive listings already in database, assume that the remaining listings are also in"
+                  "dataset")
+            logger.info("100 consecutive listings already in database, assume that the remaining listings are also in"
+                        "dataset")
             break
 
     pd_data_series = pd.DataFrame.from_dict(data, orient="index")
+    new_samples = pd_data_series.shape[0]
 
-    df_data = pd.concat([pd_data_series, loaded_hemnet_data], ignore_index=True)
-    df_data.to_csv(f"hemnet_data/hemnet_house_data_raw.csv", index=False)
-
-    print(f"originally {original_nr_objects} objects, now {df_data.shape[0]} objects")
-    logger.info(f"web scraping - originally {original_nr_objects} objects, now {df_data.shape[0]} objects")
-    return df_data
+    print(f"originally {original_nr_objects} objects, now {new_samples + original_nr_objects} objects")
+    logger.info(
+        f"web scraping - originally {original_nr_objects} objects, now {new_samples + original_nr_objects} objects")
+    return pd_data_series

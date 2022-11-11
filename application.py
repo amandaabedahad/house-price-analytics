@@ -1,5 +1,6 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
 import copy
+import os
 import pickle
 import dash
 import joblib
@@ -13,16 +14,16 @@ import locale
 import geopandas as gpd
 import numpy as np
 from dash import Input, Output, State
-# from data_process_functions import get_long_lat
+from data_process_functions import get_long_lat, clean_address_sample
 # from neural_net import Simple_nn
 import branca.colormap as cm
-from fake_useragent import UserAgent
-from geopy.geocoders import Nominatim
-from geopy.exc import GeocoderUnavailable
 from sklearn.model_selection import train_test_split
 from neural_net import get_percentage_off
 import dash_bootstrap_components as dbc
-from dash_bootstrap_templates import load_figure_template
+from sql_queries import create_server_connection, get_pandas_from_database
+from ML_models import prep_data_ml
+from dotenv import load_dotenv
+import os
 
 
 def select_regions_with_nr_samples(data, nr_samples_threshold):
@@ -40,37 +41,6 @@ def select_regions_with_nr_samples(data, nr_samples_threshold):
     freq_over_threshold = freq_regions_data.loc[freq_regions_data > nr_samples_threshold]
     new_selection = df_part.loc[df_part["region"].isin(freq_over_threshold.index)]
     return new_selection
-
-
-# TODO: need to structure this file nicely
-def do_geocode(address, geolocator, attempt=1, max_attempts=10):
-    try:
-        return geolocator.geocode(address)
-    except GeocoderUnavailable:
-        if attempt <= max_attempts:
-            return do_geocode(address, geolocator, attempt=attempt + 1)
-        print("url attempts exceeded")
-        raise
-
-
-def get_long_lat(sample, pbar=None,
-                 city='Göteborgs kommun'):  # TODO: change this hardcoded city and find more efficient calcs
-    address = sample + ', ' + city
-    ua = UserAgent()
-    header = {
-        "User-Agent": ua.random
-    }
-
-    geolocator = Nominatim(user_agent=str(header))
-    location = do_geocode(address, geolocator)
-    # location = geolocator.geocode(address)
-    if pbar is not None:
-        pbar.update(1)
-    if location is None:
-        return None, None, None
-    address_info = location.address.split(',')
-    post_code = address_info[-2]
-    return location.latitude, location.longitude, post_code
 
 
 def use_neural_net_model(x, path_model="nn_model.pkl"):
@@ -91,14 +61,15 @@ def use_random_forest_model(x, path_model="random_forest_model.joblib"):
 def find_similar_listings(x, postcode):
     # find listings in same region with same number of rooms and ish same square meter.
 
-    apartment_data = copy.deepcopy(data)
-    apartment_data = apartment_data.reset_index()
+    all_data_from_database = copy.deepcopy(data_all)
+    data_used_by_ML = prep_data_ml(all_data_from_database)
 
-    y = apartment_data[["final_price", "rent_month"]]
-    X = apartment_data.drop(columns=["final_price", "rent_month"])
+    y = data_used_by_ML[["final_price", "rent_month"]]
+    X = data_used_by_ML.drop(columns=["final_price", "rent_month"])
     # important to have same random state as when trained the model
     # so that no training samples are used here for testing.
     _, X_test, _, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    X_test["post_code"] = all_data_from_database.iloc[X_test.index]["post_code"]
     nr_rooms = x[1]
     nr_square_m = x[0]
     nr_room_options = [nr_rooms - 1 if nr_rooms > 2 else 1, nr_rooms, nr_rooms + 1]
@@ -139,27 +110,35 @@ highlight_function = lambda x: {'fillColor': '#000000',
                                 'color': '#000000',
                                 'fillOpacity': 0.50,
                                 'weight': 0.1}
+load_dotenv()
+
+connection = create_server_connection(os.environ.get('DATABASE_HOST_NAME'),
+                                      os.environ.get('DATABASE_USERNAME'),
+                                      os.environ.get('DATABASE_PASSWORD'),
+                                      os.environ.get('DATABASE_NAME'))
 
 # Read hemnet data and geo data
-data_all = pd.read_csv("hemnet_data/hemnet_house_data_processed.csv")
+data_all = get_pandas_from_database(connection, "processed_data")
+connection.close()
+
 shp_file = "geospatial_data_polygons_areas/JUR_PRIMÄROMRÅDEN_XU_region.shp"
 
 # Clean the data
 geo_data_raw = gpd.read_file(shp_file)
 geo_data = geo_data_raw[["PRIMÄROMRÅ", "PRIMÄRNAMN", "geometry"]]
 geo_data = geo_data.rename(columns={"PRIMÄRNAMN": "region"})
-data = data_all.dropna(subset=["latitude", "longitude", "price_sqr_m"])
+data_nan_dropped = data_all.dropna(subset=["latitude", "longitude", "price_sqr_m"])
 
 # Create map to include in DASH-app
 ma = folium.Map(
-    location=[data["latitude"].mean(), data["longitude"].mean()],
+    location=[data_nan_dropped["latitude"].mean(), data_nan_dropped["longitude"].mean()],
     zoom_start=7)
 
 # TODO: delete these hardcoded values only decides zoom on map
 ma.fit_bounds([(57.652402, 11.914561), (57.777214, 12.074102)])
-data = data[data["housing_type"] == "Lägenhet"]
+data_apartments = data_nan_dropped[data_nan_dropped["housing_type"] == "Lägenhet"]
 # Group data by region
-data_grouped_by_region = data.groupby(["region"], as_index=False).mean()
+data_grouped_by_region = data_apartments.groupby(["region"], as_index=False).mean()
 
 # Merge the grouped data with the polygon data --> yields the average data for each polygon (region)
 geo_data_map = geo_data.merge(data_grouped_by_region[["price_sqr_m", "region"]], on="region", how="left")
@@ -203,13 +182,13 @@ folium.LayerControl().add_to(ma)
 ma.save('map_city.html')
 
 # These dataframes are used for plots in the dash app
-data_grouped_by_rooms = data.groupby(["nr_rooms"]).mean()
+data_grouped_by_rooms = data_apartments.groupby(["nr_rooms"]).mean()
 fig_scatter = px.scatter(data_grouped_by_rooms, y="final_price",
                          title="Average price for different number of rooms",
                          labels={"final_price": "Average sold price",
                                  "nr_rooms": "Number of rooms"})
 
-data_grouped_by_date = data.groupby(["sold_date"]).mean()
+data_grouped_by_date = data_apartments.groupby(["sold_date"]).mean()
 fig_prices_over_time = px.line(data_frame=data_grouped_by_date, y="final_price", title="Average price over time",
                                labels={"final_price": "Average sold price",
                                        "sold_date": "Sold date"})
@@ -217,7 +196,7 @@ fig_prices_over_time = px.line(data_frame=data_grouped_by_date, y="final_price",
 fig_bar_plot = px.histogram(data_frame=data_all, x="housing_type", labels={"housing_type": "Housing type",
                                                                            "count": "Number of listings"})
 
-fig_box_plot = px.box(data_frame=select_regions_with_nr_samples(data, nr_samples_threshold=10),
+fig_box_plot = px.box(data_frame=select_regions_with_nr_samples(data_apartments, nr_samples_threshold=10),
                       x="price_sqr_m", y="region", labels={"price_sqr_m": "Price per square meter",
                                                            "region": "Region"})
 prettify_plots(fig_bar_plot)
@@ -341,8 +320,17 @@ app.layout = html.Div(
                                     id="loading",
                                     type="circle",
                                     parent_style=loading_style
-                                )
-                            ] , className='blockquote'
+                                ),
+                                dbc.Tooltip("Listings are considered to be similar if they are located in the same "
+                                            "area (same postal code) and same number of rooms, one more or one less. "
+                                            "Only listings from the test set are used. ",
+                                            target="howto-tooltip", placement="bottom",
+                                            style={"color": "white", "width": "40% ", "background-color": "#1e2633",
+                                                   "border": "1px solid #bbb"}),
+
+                                html.Span("how are the percentages calculated?", id="howto-tooltip",
+                                          style={"textDecoration": "underline", "cursor": "pointer", "color": "white"}),
+                            ],
                         ),
                         html.Div(
                             id="graph-container",
@@ -352,24 +340,25 @@ app.layout = html.Div(
                                     "Majority of listings are sold apartments. "
                                     "Meaningful insights can only be drawn with a data set with sufficient number of "
                                     "samples, which is why the following analytics are presented for apartments only."
-                                    "As more data is added to the data set, other housing types will be analysed"),
+                                    " As more data is added to the data set, other housing types will be analysed"),
 
                                 dcc.Graph(figure=fig_bar_plot,
                                           id="bar_plot"),
                             ]
                         ),
-                    ], className="center"
+                    ],
                 ),
             ]
         ),
         html.Div(
             children=[
-                html.H2("Insights from data",  className="graph__title"),
+                html.H2("Additional insights from data", className="graph__title"),
                 html.P("Select one or several listing types"),
                 dcc.Dropdown(
                     id="object-filter",
                     options=[
-                        {"label": object_type, "value": object_type} for object_type in data.housing_type.unique()
+                        {"label": object_type, "value": object_type} for object_type in
+                        data_nan_dropped.housing_type.unique()
                     ],
                     value="Lägenhet",
                     multi=True
@@ -392,6 +381,8 @@ app.layout = html.Div(
                              "apartment in Agnesberg can expect to pay a median of ~23k per square meter, where most "
                              "listings lay inbetween ~20k-~26k. In addition, there exist listings with an average of "
                              "18k per square meter, up to 35k per square meter."),
+                      html.H6("In summary, this plot provides easy comparison between regions, and a quick overview"
+                              " of what prices to expect as a buyer", style={"color": "#2cfec1"}),
                       dcc.Graph(figure=fig_box_plot, id="box_plot", className="boxplot-container")]
         ),
     ],
@@ -399,7 +390,7 @@ app.layout = html.Div(
 )
 
 
-### Callback for dropdown list and ML input ##############################
+### Callback for dropdown list and ML input ###
 @app.callback(
     Output("price-over-time", "figure"),
     [
@@ -415,7 +406,7 @@ def update_charts(object_type):
                                      title="Average price over time",
                                      labels={"final_price": "Average sold price",
                                              "sold_date": "Sold date"})
-    price_over_time_figure.update_layout(transition_duration=500)
+    # price_over_time_figure.update_layout(transition_duration=500)
     prettify_plots(price_over_time_figure)
     return price_over_time_figure
 
@@ -431,12 +422,16 @@ def update_charts(object_type):
 def predict_price(n_clicks, square_meters, number_rooms, address):
     new_loading_style = loading_style
     latitude, longitude, post_code = get_long_lat(address)
+
+    if square_meters < 1:
+        return 'Vladimir get hell outa here', new_loading_style
+
+    if clean_address_sample(address) is None:
+        return "The format of the address is wrong and not allowed. Try another one.", new_loading_style
+    if latitude is None:
+        return "The address is not found. Try another one", new_loading_style
+
     x = np.array([square_meters, number_rooms, latitude, longitude])
-
-    # No need to scale for random forest regression
-    # std_scaler = pickle.load(open("standard_scaler.pkl", "rb"))
-    # x_scaled = std_scaler.transform(x.reshape(1, -1))
-
     price_prediction, rent_prediction = use_random_forest_model(x.reshape(1, -1))
 
     X_similar_listings, y_similar_listings = find_similar_listings(x, post_code)

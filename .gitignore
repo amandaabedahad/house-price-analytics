@@ -1,5 +1,5 @@
-hemnet_data/my_old_data
-hemnet_data/vandans_data
+hemnet_data
 logs
 not_used
 standard_scaler.pkl
+.env
