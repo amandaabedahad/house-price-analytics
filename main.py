@@ -12,7 +12,7 @@ import data_process_functions
 import logging
 import re
 from ML_models import update_ml_model
-from create_sql_table import *
+from sql_queries import *
 
 
 def get_nr_new_samples_since_last_ml_update(logger_path, nr_listings_trigger_ml_update, target_word):
@@ -50,7 +50,7 @@ if __name__ == "__main__":
     my_logger = logging.getLogger("my_logger")
     my_logger.info("\n Main script started")
 
-    hemnet_data_raw = get_pandas_from_database(connection, "SELECT * from raw_data ORDER BY sold_date DESC")
+    hemnet_data_raw = get_pandas_from_database(connection, "raw_data")
 
     new_listings_raw_data = main_scrape_hemnet(hemnet_data_raw, my_logger)
 
@@ -61,7 +61,7 @@ if __name__ == "__main__":
         exit()
 
     nr_new_samples = new_listings_raw_data.shape[0]
-    data_processed = get_pandas_from_database(connection, "SELECT * from processed_data ORDER BY sold_date DESC")
+    data_processed = get_pandas_from_database(connection, "processed_data")
 
     nr_samples_data_processed = data_processed.shape[0]
 
