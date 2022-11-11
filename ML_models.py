@@ -13,7 +13,7 @@ from sklearn.model_selection import GridSearchCV
 # import scikitplot.estimators as esti
 import numpy as np
 from neural_net import get_percentage_off
-from create_sql_table import *
+from sql_queries import *
 
 
 def plot_corr_heatmap(df):
