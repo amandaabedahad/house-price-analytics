@@ -14,6 +14,8 @@ from sklearn.model_selection import GridSearchCV
 import numpy as np
 from neural_net import get_percentage_off
 from sql_queries import *
+import os
+from dotenv import load_dotenv
 
 
 def plot_corr_heatmap(df):
@@ -99,10 +101,12 @@ def update_ml_model(hemnet_house_data, logger):
 
 
 if __name__ == "__main__":
-    connection = create_server_connection(database_connection_settings["host_name"],
-                                          database_connection_settings["user_name"],
-                                          database_connection_settings["password"],
-                                          database_connection_settings["db"])
+    load_dotenv('.env')
+
+    connection = create_server_connection(os.environ.get('DATABASE_HOST_NAME'),
+                                          os.environ.get('DATABASE_USERNAME'),
+                                          os.environ.get('DATABASE_PASSWORD'),
+                                          os.environ.get('DATABASE_NAME'))
 
     # Read hemnet data and geo data
     data_all = get_pandas_from_database(connection, "processed_data")

@@ -13,6 +13,7 @@ import logging
 import re
 from ML_models import update_ml_model
 from sql_queries import *
+from dotenv import load_dotenv
 
 
 def get_nr_new_samples_since_last_ml_update(logger_path, nr_listings_trigger_ml_update, target_word):
@@ -33,10 +34,12 @@ def get_nr_new_samples_since_last_ml_update(logger_path, nr_listings_trigger_ml_
     return sum_new_listings, False
 
 
-connection = create_server_connection(database_connection_settings["host_name"],
-                                      database_connection_settings["user_name"],
-                                      database_connection_settings["password"],
-                                      database_connection_settings["db"])
+load_dotenv('.env')
+
+connection = create_server_connection(os.environ.get('DATABASE_HOST_NAME'),
+                                      os.environ.get('DATABASE_USERNAME'),
+                                      os.environ.get('DATABASE_PASSWORD'),
+                                      os.environ.get('DATABASE_NAME'))
 
 if __name__ == "__main__":
     path_shp_file = "geospatial_data_polygons_areas/JUR_PRIMÄROMRÅDEN_XU_region.shp"

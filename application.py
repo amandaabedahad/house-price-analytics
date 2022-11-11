@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import copy
+import os
 import pickle
 import dash
 import joblib
@@ -19,8 +20,10 @@ import branca.colormap as cm
 from sklearn.model_selection import train_test_split
 from neural_net import get_percentage_off
 import dash_bootstrap_components as dbc
-from sql_queries import create_server_connection, database_connection_settings, get_pandas_from_database
+from sql_queries import create_server_connection, get_pandas_from_database
 from ML_models import prep_data_ml
+from dotenv import load_dotenv
+import os
 
 
 def select_regions_with_nr_samples(data, nr_samples_threshold):
@@ -107,11 +110,12 @@ highlight_function = lambda x: {'fillColor': '#000000',
                                 'color': '#000000',
                                 'fillOpacity': 0.50,
                                 'weight': 0.1}
+load_dotenv('.env')
 
-connection = create_server_connection(database_connection_settings["host_name"],
-                                      database_connection_settings["user_name"],
-                                      database_connection_settings["password"],
-                                      database_connection_settings["db"])
+connection = create_server_connection(os.environ.get('DATABASE_HOST_NAME'),
+                                      os.environ.get('DATABASE_USERNAME'),
+                                      os.environ.get('DATABASE_PASSWORD'),
+                                      os.environ.get('DATABASE_NAME'))
 
 # Read hemnet data and geo data
 data_all = get_pandas_from_database(connection, "processed_data")
