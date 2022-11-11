@@ -110,7 +110,7 @@ highlight_function = lambda x: {'fillColor': '#000000',
                                 'color': '#000000',
                                 'fillOpacity': 0.50,
                                 'weight': 0.1}
-load_dotenv('.env')
+load_dotenv()
 
 connection = create_server_connection(os.environ.get('DATABASE_HOST_NAME'),
                                       os.environ.get('DATABASE_USERNAME'),
