@@ -6,11 +6,11 @@ ADD requirements.txt /app/
 
 EXPOSE 80
 
-RUN apt-get update
-RUN apt-get install libgdal-dev -y
-RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal
-RUN export C_INCLUDE_PATH=/usr/include/gdal
-RUN apt-get -y install locales
+RUN apt-get update && \
+    apt-get install libgdal-dev -y && \
+    export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
+    export C_INCLUDE_PATH=/usr/include/gdal && \
+    apt-get -y install locales
 
 RUN sed -i -e 's/# sv_SE.UTF-8 UTF-8/sv_SE.UTF-8 UTF-8/' /etc/locale.gen && \
     locale-gen
