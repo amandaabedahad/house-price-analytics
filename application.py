@@ -69,7 +69,7 @@ def find_similar_listings(x, postcode):
     # important to have same random state as when trained the model
     # so that no training samples are used here for testing.
     _, X_test, _, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    X_test["post_code"] = all_data_from_database.iloc[X_test.index]["post_code"]
+    X_test["post_code"] = all_data_from_database.iloc[X_test.index]["post_code"].str.strip()
     nr_rooms = x[1]
     nr_square_m = x[0]
     nr_room_options = [nr_rooms - 1 if nr_rooms > 2 else 1, nr_rooms, nr_rooms + 1]
@@ -326,6 +326,7 @@ app.layout = html.Div(
                         html.Div(
                             [
                                 html.P(id="prediction-output"),
+                                
                                 dcc.Loading(
                                     id="loading",
                                     type="circle",
