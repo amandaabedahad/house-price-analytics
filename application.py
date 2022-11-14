@@ -83,6 +83,34 @@ def find_similar_listings(x, postcode):
     return X_sim_listings, y_sim_listings
 
 
+def plot_scatter_rooms_type(data_to_group_and_plot):
+    grouped_data = data_to_group_and_plot.groupby(["nr_rooms"]).mean()
+    fig = px.scatter(grouped_data, y="final_price",
+                     title="Average price for different number of rooms",
+                     labels={"final_price": "Average sold price",
+                             "nr_rooms": "Number of rooms"})
+    prettify_plots(fig)
+    return fig
+
+
+def plot_prices_over_time(data_to_group_and_plot):
+    grouped_data = data_to_group_and_plot.groupby(["sold_date"]).mean()
+    fig = px.line(data_frame=grouped_data, y="final_price",
+                  title="Average price over time",
+                  labels={"final_price": "Average sold price",
+                          "sold_date": "Sold date"})
+    prettify_plots(fig)
+    return fig
+
+
+def plot_box_plot(data_to_plot, threshold=0):
+    plot_data = select_regions_with_nr_samples(data_to_plot, nr_samples_threshold=threshold)
+    fig = px.box(data_frame=plot_data, x="price_sqr_m", y="region", labels={"price_sqr_m": "Price per square meter",
+                                                                            "region": "Region"})
+    prettify_plots(fig)
+    return fig
+
+
 def prettify_plots(fig_plot):
     fig_plot.update_traces(
         marker_color='#7fafdf')
@@ -181,28 +209,10 @@ ma.keep_in_front(interactive_regions)
 folium.LayerControl().add_to(ma)
 ma.save('map_city.html')
 
-# These dataframes are used for plots in the dash app
-data_grouped_by_rooms = data_apartments.groupby(["nr_rooms"]).mean()
-fig_scatter = px.scatter(data_grouped_by_rooms, y="final_price",
-                         title="Average price for different number of rooms",
-                         labels={"final_price": "Average sold price",
-                                 "nr_rooms": "Number of rooms"})
-
-data_grouped_by_date = data_apartments.groupby(["sold_date"]).mean()
-fig_prices_over_time = px.line(data_frame=data_grouped_by_date, y="final_price", title="Average price over time",
-                               labels={"final_price": "Average sold price",
-                                       "sold_date": "Sold date"})
-
 fig_bar_plot = px.histogram(data_frame=data_all, x="housing_type", labels={"housing_type": "Housing type",
                                                                            "count": "Number of listings"})
 
-fig_box_plot = px.box(data_frame=select_regions_with_nr_samples(data_apartments, nr_samples_threshold=10),
-                      x="price_sqr_m", y="region", labels={"price_sqr_m": "Price per square meter",
-                                                           "region": "Region"})
 prettify_plots(fig_bar_plot)
-prettify_plots(fig_scatter)
-prettify_plots(fig_prices_over_time)
-prettify_plots(fig_box_plot)
 
 loading_style = {'position': 'absolute', 'align-self': 'center'}
 
@@ -361,15 +371,18 @@ app.layout = html.Div(
                         data_nan_dropped.housing_type.unique()
                     ],
                     value="Lägenhet",
-                    multi=True
+                    multi=True,
+                    className='chart-dropdown'
                 )
             ]
         ),
         html.Div(
             [
                 html.Div(
-                    children=[dcc.Graph(figure=fig_scatter, className='plot', id="price-per-room"),
-                              dcc.Graph(id="price-over-time", figure=fig_prices_over_time, className="plot")],
+                    children=[dcc.Graph(figure=plot_scatter_rooms_type(data_apartments), className='plot',
+                                        id="price-per-room"),
+                              dcc.Graph(id="price-over-time", figure=plot_prices_over_time(data_apartments),
+                                        className="plot")],
                     className="parent"
                 )
             ]
@@ -383,7 +396,17 @@ app.layout = html.Div(
                              "18k per square meter, up to 35k per square meter."),
                       html.H6("In summary, this plot provides easy comparison between regions, and a quick overview"
                               " of what prices to expect as a buyer", style={"color": "#2cfec1"}),
-                      dcc.Graph(figure=fig_box_plot, id="box_plot", className="boxplot-container")]
+                      dcc.Dropdown(id="selected-regions",
+                                   options=[
+                                       {"label": object_type, "value": object_type} for object_type in
+                                       data_apartments["region"].unique()
+                                   ],
+                                   multi=True,
+                                   className="chart-dropdown"
+                                   ),
+                      dcc.Graph(figure=plot_box_plot(data_apartments, threshold=10), id="box_plot",
+                                className="boxplot-container-all")
+                      ]
         ),
     ],
     id="root",
@@ -392,7 +415,7 @@ app.layout = html.Div(
 
 ### Callback for dropdown list and ML input ###
 @app.callback(
-    Output("price-over-time", "figure"),
+    [Output("price-over-time", "figure"), Output("price-per-room", "figure")],
     [
         Input("object-filter", "value"),
     ],
@@ -401,14 +424,9 @@ def update_charts(object_type):
     if type(object_type) == str:
         object_type = [object_type]
     filtered_data = data_all[data_all["housing_type"].isin(object_type)]
-    filtered_data_groupby_type = filtered_data.groupby(["sold_date"]).mean()
-    price_over_time_figure = px.line(data_frame=filtered_data_groupby_type, y="final_price",
-                                     title="Average price over time",
-                                     labels={"final_price": "Average sold price",
-                                             "sold_date": "Sold date"})
-    # price_over_time_figure.update_layout(transition_duration=500)
-    prettify_plots(price_over_time_figure)
-    return price_over_time_figure
+    price_over_time_figure = plot_prices_over_time(filtered_data)
+    price_type_nr_rooms = plot_scatter_rooms_type(filtered_data)
+    return price_over_time_figure, price_type_nr_rooms
 
 
 @app.callback(
@@ -452,6 +470,21 @@ def predict_price(n_clicks, square_meters, number_rooms, address):
     output_string = f"Value indication sold price:  {price_prediction[0]} kr. " \
                     f"Value indication monthly fee: {rent_prediction[0]} kr. " + output_similar_listings
     return output_string, new_loading_style
+
+
+@app.callback(
+    [Output("box_plot", "figure"), Output("box_plot", "className")],
+    Input("selected-regions", "value")
+)
+def update_box_plot(selected_regions):
+    if len(selected_regions) == 0:
+        fig = plot_box_plot(data_apartments, threshold=10)
+        style = "boxplot-container-all"
+    else:
+        data_selected_regions = data_apartments[data_apartments["region"].isin(selected_regions)]
+        fig = plot_box_plot(data_selected_regions)
+        style = "boxplot-container-few"
+    return fig, style
 
 
 if __name__ == "__main__":

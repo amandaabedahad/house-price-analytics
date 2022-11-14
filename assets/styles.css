@@ -35,12 +35,32 @@ body {
     margin: 1%;
 }
 
+.chart-dropdown{
+    background-color: #252e3f !important;
+    width: 50%
+}
+
+.Select div {
+    background-color: #252e3f !important;
+}
+
+.Select {
+    color: #7fafdf !important;
+}
+
+.Select-value-label {
+    color: #7fafdf !important;
+}
 .card {
     margin-bottom: 24px;
 }
 
-.boxplot-container {
+.boxplot-container-all {
     height: 80rem;
+}
+
+.boxplot-container-few {
+    height: 30rem;
 }
 
 @media (min-width: 1251px) {
