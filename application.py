@@ -74,21 +74,28 @@ def find_similar_listings(x, postcode):
     nr_square_m = x[0]
     nr_room_options = [nr_rooms - 1 if nr_rooms > 2 else 1, nr_rooms, nr_rooms + 1]
     similar_listings = X_test[
-        (X_test["post_code"] == postcode) & X_test["nr_rooms"].isin(nr_room_options)]
+        (X_test["post_code"] == postcode) & X_test["nr_rooms"].isin(nr_room_options) &
+        X_test["sqr_meter"].isin(range(int(nr_square_m) - 20, int(nr_square_m) + 20))]
     if similar_listings.empty:
         return None, None
-    X_sim_listings = X.iloc[similar_listings.index]
-    y_sim_listings = y.iloc[similar_listings.index]
+    X_sim_listings = X.loc[similar_listings.index]
+    y_sim_listings = y.loc[similar_listings.index]
 
     return X_sim_listings, y_sim_listings
 
 
 def plot_scatter_rooms_type(data_to_group_and_plot):
     grouped_data = data_to_group_and_plot.groupby(["nr_rooms"]).mean()
+    # exclude non-integer rooms
+    grouped_data = grouped_data.drop(grouped_data.index[grouped_data.index % 1 != 0])
     fig = px.scatter(grouped_data, y="final_price",
                      title="Average price for different number of rooms",
                      labels={"final_price": "Average sold price",
                              "nr_rooms": "Number of rooms"})
+    fig.update_traces(marker={'size': 15})
+    fig.update_layout(xaxis=dict(tick0=min(grouped_data.index.unique()),
+                                 dtick=1))
+
     prettify_plots(fig)
     return fig
 
@@ -108,12 +115,16 @@ def plot_box_plot(data_to_plot, threshold=0):
     fig = px.box(data_frame=plot_data, x="price_sqr_m", y="region", labels={"price_sqr_m": "Price per square meter",
                                                                             "region": "Region"})
     prettify_plots(fig)
+
+    fig.update_yaxes(showgrid=False)
     return fig
 
 
 def prettify_plots(fig_plot):
     fig_plot.update_traces(
         marker_color='#7fafdf')
+    fig_plot.update_xaxes(gridwidth=0.5, gridcolor='Grey')
+    fig_plot.update_yaxes(gridwidth=0.5, gridcolor='Grey')
 
     fig_plot.update_layout({
         'paper_bgcolor': "#1f2630",
@@ -224,11 +235,12 @@ nr_rooms_slide = list(np.linspace(1, 10, 10))
 app.layout = html.Div(
     children=[
         html.Div([
-            html.H4("HEMNET ANALYTICS AND INSIGHTS", className="app__header__title"),
-            html.P(
+            html.H2("HEMNET ANALYTICS AND INSIGHTS", className="app__header__title"),
+            html.P([
                 "This dashboard aims to provide useful information and insights of the "
-                "objects sold in Gothenburg, Sweden. This is an extension to information "
-                "already presented on the Swedish house market - www.hemnet.se.",
+                "objects sold in Gothenburg, Sweden.", html.Br(),
+                " This is an extension to information "
+                "already presented on the Swedish house market - www.hemnet.se."],
                 className="app__header__title--grey",
             ),
         ],
@@ -280,7 +292,7 @@ app.layout = html.Div(
                             "using ML"),
                         html.P(
                             className="slider-text",
-                            children="Drag the slider to change the nr of square meters:",
+                            children="Drag the slider to change number of square meters:",
                         ),
                         dcc.Slider(
                             id="square-meters",
@@ -298,7 +310,7 @@ app.layout = html.Div(
                         ),
                         html.P(
                             className="slider-text",
-                            children="Drag the slider to change the nr of rooms:",
+                            children="Drag the slider to change number of rooms:",
                         ),
                         dcc.Slider(
                             id="number-rooms",
@@ -326,21 +338,12 @@ app.layout = html.Div(
                         html.Div(
                             [
                                 html.P(id="prediction-output"),
-                                
+
                                 dcc.Loading(
                                     id="loading",
                                     type="circle",
                                     parent_style=loading_style
                                 ),
-                                dbc.Tooltip("Listings are considered to be similar if they are located in the same "
-                                            "area (same postal code) and same number of rooms, one more or one less. "
-                                            "Only listings from the test set are used. ",
-                                            target="howto-tooltip", placement="bottom",
-                                            style={"color": "white", "width": "40% ", "background-color": "#1e2633",
-                                                   "border": "1px solid #bbb"}),
-
-                                html.Span("how are the percentages calculated?", id="howto-tooltip",
-                                          style={"textDecoration": "underline", "cursor": "pointer", "color": "white"}),
                             ],
                         ),
                         html.Div(
@@ -348,10 +351,8 @@ app.layout = html.Div(
                             children=[
                                 html.H6("Overview of the data set", className="graph__title"),
                                 html.P(
-                                    "Majority of listings are sold apartments. "
                                     "Meaningful insights can only be drawn with a data set with sufficient number of "
-                                    "samples, which is why the following analytics are presented for apartments only."
-                                    " As more data is added to the data set, other housing types will be analysed"),
+                                    "samples. If not otherwise mentioned, apartment data is used to obtain the results"),
 
                                 dcc.Graph(figure=fig_bar_plot,
                                           id="bar_plot"),
@@ -395,8 +396,9 @@ app.layout = html.Div(
                              "apartment in Agnesberg can expect to pay a median of ~23k per square meter, where most "
                              "listings lay inbetween ~20k-~26k. In addition, there exist listings with an average of "
                              "18k per square meter, up to 35k per square meter."),
-                      html.H6("In summary, this plot provides easy comparison between regions, and a quick overview"
+                      html.H3("In summary, this plot provides easy comparison between regions, and a quick overview"
                               " of what prices to expect as a buyer", style={"color": "#2cfec1"}),
+                      html.P("Select one or several regions for easy comparison"),
                       dcc.Dropdown(id="selected-regions",
                                    options=[
                                        {"label": object_type, "value": object_type} for object_type in
@@ -432,7 +434,8 @@ def update_charts(object_type):
 
 @app.callback(
     [Output("prediction-output", "children"),
-     Output('loading', 'parent_style')],
+     Output('loading', 'parent_style'),
+     Output("prediction-output", "style"), ],
     [Input("submit-button", "n_clicks"),
      State("square-meters", "value"),
      State("number-rooms", "value"),
@@ -442,20 +445,19 @@ def predict_price(n_clicks, square_meters, number_rooms, address):
     new_loading_style = loading_style
     latitude, longitude, post_code = get_long_lat(address)
 
-    if square_meters < 1:
-        return 'Vladimir get hell outa here', new_loading_style
-
     if clean_address_sample(address) is None:
-        return "The format of the address is wrong and not allowed. Try another one.", new_loading_style
+        return "The format of the address is wrong and not allowed. Try another one.", new_loading_style, {
+            "color": "red"}
     if latitude is None:
-        return "The address is not found. Try another one", new_loading_style
+        return "The address is not found in Gothenburg municipality. Try another one", new_loading_style, {
+            "color": "red"}
 
     x = np.array([square_meters, number_rooms, latitude, longitude])
     price_prediction, rent_prediction = use_random_forest_model(x.reshape(1, -1))
 
     X_similar_listings, y_similar_listings = find_similar_listings(x, post_code)
     if X_similar_listings is None:
-        output_similar_listings = "No similar listings could be found."
+        output_similar_listings = None, None
     else:
         x_similar_listings = X_similar_listings[["sqr_meter", "nr_rooms", "latitude", "longitude"]].values
 
@@ -465,12 +467,42 @@ def predict_price(n_clicks, square_meters, number_rooms, address):
                                                                          price_prediction_sim_listings).mean(axis=0), 1)
         rent_percentage_off = round(get_percentage_off(y_similar_listings["rent_month"].values,
                                                        rent_prediction_sim_listings).mean(axis=0), 1)
-        output_similar_listings = "The predicted price percentage off on similar listings in this area is " \
-                                  f"{price_percentage_off_similar_listings} and {rent_percentage_off} for the fee."
+        output_similar_listings = price_percentage_off_similar_listings, rent_percentage_off
 
-    output_string = f"Value indication sold price:  {price_prediction[0]} kr. " \
-                    f"Value indication monthly fee: {rent_prediction[0]} kr. " + output_similar_listings
-    return output_string, new_loading_style
+    style_output_predictions = {"font-size": "2em", "margin": "0", "margin-top": "0", "font-weight": "Bold",
+                                "color": "#2cfec1"}
+
+    output_string = html.P(
+        children=
+        [
+            html.P("The predicted price for the listing is:"),
+            html.P([locale.currency(price_prediction[0], grouping=True), " ± ", output_similar_listings[0], "%"],
+                   style=style_output_predictions),
+            html.P("The predicted monthly fee for the listing above is:"),
+            html.P([locale.currency(rent_prediction[0], grouping=True), " ± ", output_similar_listings[1], "%"],
+                   style=style_output_predictions),
+            dbc.Tooltip(children=[
+                "Using the ML-model, the average percentage off on similar listings are calculated. "
+                "Listings are considered to be similar if:",
+                html.Ul([html.Li("Located in the same area (same post code)"),
+                         html.Li("Similar number of rooms - equal, one more or one less"),
+                         html.Li("Similar size - 20sqm more or less")]),
+                "If no value is shown, no similar listings was found."],
+                target="howto-tooltip", placement="bottom",
+                style={"color": "white", "width": "40% ", "background-color": "#1e2633",
+                       "border": "1px solid #bbb"}),
+
+            html.Span("how are the percentages calculated?", id="howto-tooltip",
+                      style={"textDecoration": "underline", "cursor": "pointer", "color": "white"})
+        ]
+    )
+    '''map_temporary = copy.copy(ma)
+    folium.Marker([latitude, longitude]).add_to(map_temporary)
+    map_temporary.save('map_city_with_temp.html')
+    map_temporary._children.popitem(last=True)
+    test = open('map_city_with_temp.html', 'r').read()'''
+
+    return output_string, new_loading_style, None
 
 
 @app.callback(
@@ -478,7 +510,7 @@ def predict_price(n_clicks, square_meters, number_rooms, address):
     Input("selected-regions", "value")
 )
 def update_box_plot(selected_regions):
-    if len(selected_regions) == 0:
+    if selected_regions is None or len(selected_regions) == 0:
         fig = plot_box_plot(data_apartments, threshold=10)
         style = "boxplot-container-all"
     else:
