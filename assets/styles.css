@@ -19,7 +19,7 @@ body {
         flex-direction: row;
         justify-content: flex-start;
         align-items: stretch;
-        height: 70rem;
+        height: 75rem;
         margin-bottom: 5rem;
     }
 }
