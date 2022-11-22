@@ -61,15 +61,27 @@ def use_random_forest_model(x, path_model="random_forest_model.joblib"):
 def find_similar_listings(x, postcode):
     # find listings in same region with same number of rooms and ish same square meter.
 
+    connection = create_server_connection(os.environ.get('DATABASE_HOST_NAME'),
+                                          os.environ.get('DATABASE_USERNAME'),
+                                          os.environ.get('DATABASE_PASSWORD'),
+                                          os.environ.get('DATABASE_NAME'))
+
     all_data_from_database = copy.deepcopy(data_all)
     data_used_by_ML = prep_data_ml(all_data_from_database)
+    listing_information_train_or_test = get_pandas_from_database(connection, "listing_train_or_test_set")
 
-    y = data_used_by_ML[["final_price", "rent_month"]]
-    X = data_used_by_ML.drop(columns=["final_price", "rent_month"])
-    # important to have same random state as when trained the model
-    # so that no training samples are used here for testing.
-    _, X_test, _, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    X_test["post_code"] = all_data_from_database.iloc[X_test.index]["post_code"].str.strip()
+    connection.close()
+
+    test_listings = data_used_by_ML[
+        (data_used_by_ML["listing_id"].isin(listing_information_train_or_test["listing_id"])) &
+        (listing_information_train_or_test["listing_in_train_set"] == 0)]
+
+    y_test = test_listings[["final_price", "rent_month", "listing_id"]]
+    X_test = test_listings.drop(columns=["final_price", "rent_month"])
+
+    X_test["post_code"] = all_data_from_database[
+        all_data_from_database["listing_id"].isin(X_test["listing_id"])]["post_code"].str.strip()
+
     nr_rooms = x[1]
     nr_square_m = x[0]
     nr_room_options = [nr_rooms - 1 if nr_rooms > 2 else 1, nr_rooms, nr_rooms + 1]
@@ -78,10 +90,9 @@ def find_similar_listings(x, postcode):
         X_test["sqr_meter"].isin(range(int(nr_square_m) - 20, int(nr_square_m) + 20))]
     if similar_listings.empty:
         return None, None
-    X_sim_listings = X.loc[similar_listings.index]
-    y_sim_listings = y.loc[similar_listings.index]
+    y_similar_listings = y_test[y_test["listing_id"].isin(similar_listings["listing_id"])]
 
-    return X_sim_listings, y_sim_listings
+    return similar_listings, y_similar_listings
 
 
 def plot_scatter_rooms_type(data_to_group_and_plot):
