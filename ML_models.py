@@ -53,8 +53,25 @@ def simple_linear_regression(X, y):
     print(reg.score(X_test, y_test))
 
 
-def random_forest_regressor(X, y, logger=None):
-    X_train, X_test, y_train, y_test = train_test_split(X.values, y.values, test_size=0.2, random_state=42)
+def random_forest_regressor(data, logger=None):
+    y = data[["final_price", "rent_month"]]
+    X = data.drop(columns=["final_price", "rent_month"])
+
+    X_train_df, X_test_df, y_train_df, y_test_df = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    reset_train_indices_in_table(connection, "listing_information")
+
+    data_listing_information = get_pandas_from_database(connection, "listing_information")
+    listings_in_train_condition = data_listing_information["listing_id"].isin(X_train_df["listing_id"].values)
+    data_listing_information["listing_in_train_set"][listings_in_train_condition] = 1
+    remove_and_update_table(connection, data_listing_information, "listing_train_or_test_set")
+
+    connection.close()
+
+    X_train = X_train_df.drop(columns=["listing_id"]).values
+    X_test = X_test_df.drop(columns=["listing_id"]).values
+    y_train = y_train_df.values
+    y_test = y_test_df.values
 
     param_grid = {'n_estimators': [300, 400, 500],
                   'max_features': [0.1, 0.3, 0.6]
@@ -82,7 +99,7 @@ def random_forest_regressor(X, y, logger=None):
 def prep_data_ml(data_all):
     apartment_data = data_all[data_all["housing_type"] == "Lägenhet"]
     data_filtered = apartment_data[
-        ["sqr_meter", "nr_rooms", "final_price", "latitude", "longitude", "rent_month"]].dropna()
+        ["sqr_meter", "nr_rooms", "final_price", "latitude", "longitude", "rent_month", "listing_id"]].dropna()
     data_final = data_filtered.drop(data_filtered[data_filtered["rent_month"] == 0].index, axis=0)
     return data_final
 
@@ -92,9 +109,8 @@ def update_ml_model(hemnet_house_data, logger):
     logger.info("updating machine learning model: random forest")
 
     data = prep_data_ml(hemnet_house_data)
-    y = data[["final_price", "rent_month"]]
-    X = data.drop(columns=["final_price", "rent_month"])
-    model = random_forest_regressor(X, y, logger)
+
+    model = random_forest_regressor(data, logger)
 
     logger.info("New model and standard scaler is saved")
     joblib.dump(model, "random_forest_model.joblib")
@@ -110,13 +126,10 @@ if __name__ == "__main__":
 
     # Read hemnet data and geo data
     data_all = get_pandas_from_database(connection, "processed_data")
-    data_all.plot(kind="scatter", x="latitude", y="longitude", alpha=0.4, c="final_price",
-                  cmap=plt.get_cmap("jet"), colorbar=True, sharex=False)
-    # plt.show()
-    data = prep_data_ml(data_all)
-    y = data[["final_price", "rent_month"]]
-    X = data.drop(columns=["final_price", "rent_month"])
+    data_listing_information = get_pandas_from_database(connection, "listing_information")
 
-    forest_model = random_forest_regressor(X, y)
+    data = prep_data_ml(data_all)
+
+    forest_model = random_forest_regressor(data)
 
     joblib.dump(forest_model, "random_forest_model.joblib")
