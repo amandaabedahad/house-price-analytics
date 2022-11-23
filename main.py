@@ -57,6 +57,7 @@ if __name__ == "__main__":
 
     new_listings_raw_data = main_scrape_hemnet(hemnet_data_raw, my_logger)
 
+    new_listings_raw_data = new_listings_raw_data.sort_index()
     if new_listings_raw_data.empty:
         print('No new samples found when scraped web page')
         my_logger.info("0 new listings that needs to be processed - script exited")
@@ -69,8 +70,8 @@ if __name__ == "__main__":
     nr_samples_data_processed = data_processed.shape[0]
 
     my_logger.info(f"{nr_new_samples} new listings that needs to be processed")
-    pbar = tqdm(total=nr_new_samples)
     print(f'{nr_new_samples} new samples to be processed')
+    pbar = tqdm(total=nr_new_samples)
 
     new_listings_to_be_processed = copy.deepcopy(new_listings_raw_data)
     new_listings_to_be_processed["region"] = new_listings_to_be_processed["region"].apply(
@@ -84,7 +85,9 @@ if __name__ == "__main__":
         "post_code"] = zip(*location_info)
 
     processed_new_data = data_process_functions.map_address_to_area(new_listings_to_be_processed, path_shp_file)
+    processed_new_data = processed_new_data.sort_index()
 
+    # TODO: change position of this since the new samples hasnt listing_id yet
     hemnet_data_processed_all = pd.concat([processed_new_data, data_processed], ignore_index=True)
 
     new_listings_since_last_ml_update, reached_trigger_amount = get_nr_new_samples_since_last_ml_update(
@@ -92,12 +95,32 @@ if __name__ == "__main__":
     )
 
     my_logger.info(f"{new_listings_since_last_ml_update} listings since last ML-update")
-
+    reached_trigger_amount = False
     if reached_trigger_amount:
         update_ml_model(hemnet_data_processed_all, my_logger)
 
+    # append rows with corresponding listing_id to listing_information table
+    data_listing_information = get_pandas_from_database(connection, "listing_information")
+    max_listing_id = data_listing_information["listing_id"].max()
+    new_listing_ids = pd.DataFrame(
+        np.arange(max_listing_id + 1,
+                  max_listing_id + nr_new_samples + 1), columns=["listing_id"], index=processed_new_data.index)
+
+    # join on index --> assured to have same listing id for every index. Index is same for same listings
+    new_listings_raw_data = new_listings_raw_data.join(new_listing_ids)
+    processed_new_data = processed_new_data.join(new_listing_ids)
+
+    # TODO: assert something so that id corresponds to same listings in both tables.
+    # TODO: triggers can be add so that it automatically adds listing id to a table when \
+    # added to another table
+
+    insert_to_database(connection, new_listing_ids, "listing_information")
     insert_to_database(connection, new_listings_raw_data, "raw_data")
     insert_to_database(connection, processed_new_data, "processed_data")
+
+    # since all the new listings have not been in training!!!!!!
+    new_listing_ids["listing_in_train_set"] = 0
+    insert_to_database(connection, new_listing_ids, "listing_train_or_test_set")
 
     my_logger.info("Data scraping and processing finished.")
 
