@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-from fake_useragent import UserAgent
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderUnavailable
 import re
@@ -23,7 +22,9 @@ def do_geocode(address, geolocator, attempt=1, max_attempts=10):
 
 
 def clean_address_sample(sample):
-    match = re.search("([A-Ö|a-ö]+.)*(\d+)*(\w)*(\s[A-J])*", sample)
+    match = re.search("^([A-Ö|a-ö]+.)+(\d+)*(\w)*(\s[A-J])*", sample)
+    if match is None:
+        return None
     str_match = match[0]
     str_match_formatted = re.sub(r"(?<=\d)\s", "", str_match)
     return str_match_formatted
@@ -35,22 +36,16 @@ def clean_region_sample(sample):
     return last
 
 
-def get_long_lat(sample, pbar,
-                 city='Göteborgs kommun'):  # TODO: change this hardcoded city and find more efficient calcs
-    address = sample + ', ' + city
-    ua = UserAgent()
-    header = {
-        "User-Agent": ua.random
-    }
-
-    geolocator = Nominatim(user_agent=str(header))
+def get_long_lat(address, pbar=None):
+    geolocator = Nominatim(user_agent="email")
     location = do_geocode(address, geolocator)
-    # location = geolocator.geocode(address)
-    pbar.update(1)
-    if location is None:
+    if pbar is not None:
+        pbar.update(1)
+    if location is None or "Göteborg" not in location.address:
         return None, None, None
-    address_info = location.address.split(',')
-    post_code = address_info[-2]
+    post_code = re.search("\d{3} \d{2}", location.address)
+    if post_code is not None:
+        post_code = post_code[0]
     return location.latitude, location.longitude, post_code
 
 
@@ -102,10 +97,6 @@ def interpolate_missing_data_KNN(dataframe, column):
         print(mse)
         print(neigh.best_params_, neigh.best_score_)
 
-    def interpolate_missing_data_mean(data, columns):
-        data.interpolate()
-        return data
-
 
 def map_address_to_area(hemnet_data, path_shp_file):
     hemnet_data_copy = hemnet_data.copy()
@@ -121,25 +112,22 @@ def map_address_to_area(hemnet_data, path_shp_file):
     hemnet_data_copy["coordinates"] = list(zip(hemnet_data_copy["longitude"], hemnet_data_copy["latitude"]))
     hemnet_data_copy["coordinates"] = hemnet_data_copy["coordinates"].apply(Point)
 
-    points = gpd.GeoDataFrame(hemnet_data_copy[["coordinates", "address", "latitude", "longitude"]], geometry="coordinates")
+    points = gpd.GeoDataFrame(hemnet_data_copy[["coordinates", "address", "latitude", "longitude"]],
+                              geometry="coordinates")
     points.crs = "EPSG:4326"
     points_to_region_map = gpd.tools.sjoin(points, geo_data, predicate="within")
 
     hemnet_data_nan_location = hemnet_data_copy[hemnet_data_copy["longitude"].isna()].drop("coordinates", axis=1)
-    hemnet_data_with_loc_data = hemnet_data_copy.loc[~hemnet_data_copy["longitude"].isna()].drop(["coordinates", "region"], axis=1)
+    hemnet_data_with_loc_data = hemnet_data_copy.loc[~hemnet_data_copy["longitude"].isna()].drop(
+        ["coordinates", "region"], axis=1)
 
-    hemnet_data_merged = hemnet_data_with_loc_data.merge(points_to_region_map[["region", "latitude", "longitude"]],
-                                    on=["latitude", "longitude"]).drop_duplicates()
+    hemnet_data_merged = hemnet_data_with_loc_data.merge(
+        points_to_region_map[["region", "latitude", "longitude"]],right_index=True, left_index=True,
+        suffixes=(None, '_x')).drop(["latitude_x", "longitude_x"], axis=1)
+
     hemnet_data_mapped = pd.concat([hemnet_data_merged, hemnet_data_nan_location])
-    # hemnet_data.to_csv("hemnet_data/hemnet_house_data_processed.csv", index=False)
     return hemnet_data_mapped
 
 
-def process_data(new_data, pbar):
-    new_data["region"] = new_data["region"].apply(clean_region_sample)
-    new_data["address"] = new_data["address"].apply(clean_address_sample)
-
-    location_info = new_data["address"].apply(lambda x: get_long_lat(x, pbar=pbar))
-    new_data["latitude"], new_data["longitude"], new_data["post_code"] = zip(*location_info)
-
-    return new_data
+if __name__ == "__main__":
+    pass
