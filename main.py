@@ -95,6 +95,7 @@ if __name__ == "__main__":
     )
 
     my_logger.info(f"{new_listings_since_last_ml_update} listings since last ML-update")
+    # TODO: reset new listings since last ml and remove False from below
     reached_trigger_amount = False
     if reached_trigger_amount:
         update_ml_model(hemnet_data_processed_all, my_logger)
