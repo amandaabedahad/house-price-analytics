@@ -11,8 +11,9 @@ from scrape_hemnet import main_scrape_hemnet
 import data_process_functions
 import logging
 import re
+import numpy as np
 from ML_models import update_ml_model
-from sql_queries import *
+from sql_queries import get_pandas_from_database, insert_to_database
 from dotenv import load_dotenv
 
 
@@ -36,11 +37,6 @@ def get_nr_new_samples_since_last_ml_update(logger_path, nr_listings_trigger_ml_
 
 load_dotenv('.env')
 
-connection = create_server_connection(os.environ.get('DATABASE_HOST_NAME'),
-                                      os.environ.get('DATABASE_USERNAME'),
-                                      os.environ.get('DATABASE_PASSWORD'),
-                                      os.environ.get('DATABASE_NAME'))
-
 if __name__ == "__main__":
     path_shp_file = "geospatial_data_polygons_areas/JUR_PRIMÄROMRÅDEN_XU_region.shp"
 
@@ -53,7 +49,7 @@ if __name__ == "__main__":
     my_logger = logging.getLogger("my_logger")
     my_logger.info("\n Main script started")
 
-    hemnet_data_raw = get_pandas_from_database(connection, "raw_data")
+    hemnet_data_raw = get_pandas_from_database("raw_data")
 
     new_listings_raw_data = main_scrape_hemnet(hemnet_data_raw, my_logger)
 
@@ -61,11 +57,10 @@ if __name__ == "__main__":
     if new_listings_raw_data.empty:
         print('No new samples found when scraped web page')
         my_logger.info("0 new listings that needs to be processed - script exited")
-        connection.close()
         exit()
 
     nr_new_samples = new_listings_raw_data.shape[0]
-    data_processed = get_pandas_from_database(connection, "processed_data")
+    data_processed = get_pandas_from_database("processed_data")
 
     nr_samples_data_processed = data_processed.shape[0]
 
@@ -87,22 +82,11 @@ if __name__ == "__main__":
     processed_new_data = data_process_functions.map_address_to_area(new_listings_to_be_processed, path_shp_file)
     processed_new_data = processed_new_data.sort_index()
 
-    # TODO: change position of this since the new samples hasnt listing_id yet
-    hemnet_data_processed_all = pd.concat([processed_new_data, data_processed], ignore_index=True)
-
-    new_listings_since_last_ml_update, reached_trigger_amount = get_nr_new_samples_since_last_ml_update(
-        path_log_file, nr_listings_trigger_ml_update=200, target_word="new listings"
-    )
-
-    my_logger.info(f"{new_listings_since_last_ml_update} listings since last ML-update")
-    # TODO: reset new listings since last ml and remove False from below
-    reached_trigger_amount = False
-    if reached_trigger_amount:
-        update_ml_model(hemnet_data_processed_all, my_logger)
-
     # append rows with corresponding listing_id to listing_information table
-    data_listing_information = get_pandas_from_database(connection, "listing_information")
+    data_listing_information = get_pandas_from_database("listing_information")
     max_listing_id = data_listing_information["listing_id"].max()
+
+    # Create new unique listing_ids
     new_listing_ids = pd.DataFrame(
         np.arange(max_listing_id + 1,
                   max_listing_id + nr_new_samples + 1), columns=["listing_id"], index=processed_new_data.index)
@@ -111,18 +95,25 @@ if __name__ == "__main__":
     new_listings_raw_data = new_listings_raw_data.join(new_listing_ids)
     processed_new_data = processed_new_data.join(new_listing_ids)
 
-    # TODO: assert something so that id corresponds to same listings in both tables.
-    # TODO: triggers can be add so that it automatically adds listing id to a table when \
-    # added to another table
+    # Checks if it is time to retrain the ML-model
+    new_listings_since_last_ml_update, reached_trigger_amount = get_nr_new_samples_since_last_ml_update(
+        path_log_file, nr_listings_trigger_ml_update=200, target_word="new listings"
+    )
 
-    insert_to_database(connection, new_listing_ids, "listing_information")
-    insert_to_database(connection, new_listings_raw_data, "raw_data")
-    insert_to_database(connection, processed_new_data, "processed_data")
+    my_logger.info(f"{new_listings_since_last_ml_update} listings since last ML-update")
+
+    if reached_trigger_amount:
+        # concat newly extracted data and data from data base. used
+        hemnet_data_processed_all = pd.concat([processed_new_data, data_processed], ignore_index=True)
+        update_ml_model(hemnet_data_processed_all, my_logger)
+
+    # Insert new data into tables in database
+    insert_to_database(new_listing_ids, "listing_information")
+    insert_to_database(new_listings_raw_data, "raw_data")
+    insert_to_database(processed_new_data, "processed_data")
 
     # since all the new listings have not been in training!!!!!!
     new_listing_ids["listing_in_train_set"] = 0
-    insert_to_database(connection, new_listing_ids, "listing_train_or_test_set")
+    insert_to_database(new_listing_ids, "listing_train_or_test_set")
 
     my_logger.info("Data scraping and processing finished.")
-
-    connection.close()
