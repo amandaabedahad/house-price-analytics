@@ -9,7 +9,6 @@ import seaborn as sns
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import GridSearchCV
 import numpy as np
-from neural_net import get_percentage_off
 from sql_queries import reset_train_indices_in_table, get_pandas_from_database, remove_and_update_table
 from dotenv import load_dotenv
 
@@ -108,10 +107,10 @@ def xgboost_model(data, logger=None):
     y_test = y_test_df.values
 
     params = {'max_depth': [3, 6, 8],
-              #'learning_rate': [0.01, 0.1, 0.2, 0.3],
-              #'subsample': np.arange(0.5, 1.0, 0.1),
-              #'colsample_bytree': np.arange(0.4, 1.0, 0.1),
-              #'colsample_bylevel': np.arange(0.4, 1.0, 0.1),
+              # 'learning_rate': [0.01, 0.1, 0.2, 0.3],
+              # 'subsample': np.arange(0.5, 1.0, 0.1),
+              # 'colsample_bytree': np.arange(0.4, 1.0, 0.1),
+              # 'colsample_bylevel': np.arange(0.4, 1.0, 0.1),
               'n_estimators': [200, 400]}
     xgbr = xgb.XGBRegressor(seed=20)
     clf = GridSearchCV(estimator=xgbr,
@@ -139,6 +138,11 @@ def prep_data_ml(data_all):
         ["sqr_meter", "nr_rooms", "final_price", "latitude", "longitude", "rent_month", "listing_id"]].dropna()
     data_final = data_filtered.drop(data_filtered[data_filtered["rent_month"] == 0].index, axis=0)
     return data_final
+
+
+def get_percentage_off(y_true, y_pred):
+    if type(y_true).__module__ is np.__name__:
+        return np.abs(y_true - y_pred) / y_true * 100
 
 
 def update_ml_model(hemnet_house_data, logger):

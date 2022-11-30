@@ -12,10 +12,9 @@ import numpy as np
 from dash import Input, Output, State
 from data_process_functions import get_long_lat, clean_address_sample
 import branca.colormap as cm
-from neural_net import get_percentage_off
 import dash_bootstrap_components as dbc
 from sql_queries import get_pandas_from_database
-from ML_models import prep_data_ml
+from ML_models import prep_data_ml, get_percentage_off
 from dotenv import load_dotenv
 
 
