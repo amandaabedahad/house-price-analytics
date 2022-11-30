@@ -1,6 +1,10 @@
+import os
 import pymysql.cursors
 import pandas as pd
 import numpy as np
+from dotenv import load_dotenv
+
+load_dotenv('.env')
 
 
 def create_server_connection(host_name, user_name, password, db):
@@ -15,13 +19,22 @@ def create_server_connection(host_name, user_name, password, db):
     return connection
 
 
-def get_pandas_from_database(connection, table):
+def get_pandas_from_database(table):
+    connection = create_server_connection(os.environ.get('DATABASE_HOST_NAME'),
+                                          os.environ.get('DATABASE_USERNAME'),
+                                          os.environ.get('DATABASE_PASSWORD'),
+                                          os.environ.get('DATABASE_NAME'))
     sql_query = f"SELECT * from {table} ORDER BY listing_id DESC"
     df = pd.read_sql(sql_query, connection)
+    connection.close()
     return df
 
 
-def insert_to_database(connection, new_data, table):
+def insert_to_database(new_data, table):
+    connection = create_server_connection(os.environ.get('DATABASE_HOST_NAME'),
+                                          os.environ.get('DATABASE_USERNAME'),
+                                          os.environ.get('DATABASE_PASSWORD'),
+                                          os.environ.get('DATABASE_NAME'))
     values_raw = (new_data.shape[1] - 1) * "%s," + "%s"
 
     if table == 'listing_information' or 'listing_train_or_test_set':
@@ -50,27 +63,42 @@ def insert_to_database(connection, new_data, table):
     cursor = connection.cursor()
     cursor.executemany(sql_insert_raw_data, new_data_removing_nan.values.tolist())
     connection.commit()
+    connection.close()
 
 
-def reset_train_indices_in_table(connection, table):
+def reset_train_indices_in_table(table):
+    connection = create_server_connection(os.environ.get('DATABASE_HOST_NAME'),
+                                          os.environ.get('DATABASE_USERNAME'),
+                                          os.environ.get('DATABASE_PASSWORD'),
+                                          os.environ.get('DATABASE_NAME'))
     sql_reset_rows = f"UPDATE {table} SET listing_in_train_set = 0"
     cursor = connection.cursor()
     cursor.execute(sql_reset_rows)
     connection.commit()
+    connection.close()
 
 
 # This function works, but takes way too long time to execute. Takes time to find the right index where to update,
 # even when using primary keys.
-def update_rows_in_table(connection, new_data, table):
+def update_rows_in_table(new_data, table):
+    connection = create_server_connection(os.environ.get('DATABASE_HOST_NAME'),
+                                          os.environ.get('DATABASE_USERNAME'),
+                                          os.environ.get('DATABASE_PASSWORD'),
+                                          os.environ.get('DATABASE_NAME'))
     sql_update_rows = f"UPDATE {table} SET listing_in_train_set = %s WHERE listing_id = %s ORDER BY listing_id asc"
     reordered_column_data = new_data[["listing_in_train_set", "listing_id"]].values.tolist()
     cursor = connection.cursor()
     cursor.executemany(sql_update_rows, reordered_column_data)
     connection.commit()
+    connection.close()
 
 
 # Instead of update, remove content of whole table and insert again
-def remove_and_update_table(connection, new_data, table):
+def remove_and_update_table(new_data, table):
+    connection = create_server_connection(os.environ.get('DATABASE_HOST_NAME'),
+                                          os.environ.get('DATABASE_USERNAME'),
+                                          os.environ.get('DATABASE_PASSWORD'),
+                                          os.environ.get('DATABASE_NAME'))
     sql_query_drop_column_listing_in_train = f"DELETE FROM {table}"
     cursor = connection.cursor()
     cursor.execute(sql_query_drop_column_listing_in_train)
@@ -79,3 +107,4 @@ def remove_and_update_table(connection, new_data, table):
 
     cursor.executemany(sql_insert_query, new_data.values.tolist())
     connection.commit()
+    connection.close()

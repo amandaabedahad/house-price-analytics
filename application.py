@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
 import copy
-import os
-import pickle
 import dash
 import joblib
-# import torch
 from dash import dcc
 from dash import html
-import pandas as pd
 import plotly.express as px
 import folium
 import locale
@@ -15,15 +11,12 @@ import geopandas as gpd
 import numpy as np
 from dash import Input, Output, State
 from data_process_functions import get_long_lat, clean_address_sample
-# from neural_net import Simple_nn
 import branca.colormap as cm
-from sklearn.model_selection import train_test_split
 from neural_net import get_percentage_off
 import dash_bootstrap_components as dbc
-from sql_queries import create_server_connection, get_pandas_from_database
+from sql_queries import get_pandas_from_database
 from ML_models import prep_data_ml
 from dotenv import load_dotenv
-import os
 
 
 def select_regions_with_nr_samples(data, nr_samples_threshold):
@@ -43,13 +36,6 @@ def select_regions_with_nr_samples(data, nr_samples_threshold):
     return new_selection
 
 
-def use_neural_net_model(x, path_model="nn_model.pkl"):
-    net = Simple_nn()
-    net.load_state_dict(torch.load(path_model))
-    price_prediction = net(torch.tensor(x).float())
-    return price_prediction.item()
-
-
 def use_random_forest_model(x, path_model="random_forest_model.joblib"):
     model = joblib.load(path_model)
     prediction = model.predict(x)
@@ -61,18 +47,11 @@ def use_random_forest_model(x, path_model="random_forest_model.joblib"):
 def find_similar_listings(x, postcode):
     # find listings in same region with same number of rooms and ish same square meter.
 
-    connection = create_server_connection(os.environ.get('DATABASE_HOST_NAME'),
-                                          os.environ.get('DATABASE_USERNAME'),
-                                          os.environ.get('DATABASE_PASSWORD'),
-                                          os.environ.get('DATABASE_NAME'))
-
     all_data_from_database = copy.deepcopy(data_all)
     data_used_by_ML = prep_data_ml(all_data_from_database)
-    listing_information_train_or_test = get_pandas_from_database(connection, "listing_train_or_test_set")
+    listing_information_train_or_test = get_pandas_from_database("listing_train_or_test_set")
 
-    connection.close()
-
-    test_listings = data_used_by_ML[
+    test_listings = data_used_by_ML.loc[
         (data_used_by_ML["listing_id"].isin(listing_information_train_or_test["listing_id"])) &
         (listing_information_train_or_test["listing_in_train_set"] == 0)]
 
@@ -91,7 +70,6 @@ def find_similar_listings(x, postcode):
     if similar_listings.empty:
         return None, None
     y_similar_listings = y_test[y_test["listing_id"].isin(similar_listings["listing_id"])]
-
     return similar_listings, y_similar_listings
 
 
@@ -162,14 +140,8 @@ highlight_function = lambda x: {'fillColor': '#000000',
                                 'weight': 0.1}
 load_dotenv()
 
-connection = create_server_connection(os.environ.get('DATABASE_HOST_NAME'),
-                                      os.environ.get('DATABASE_USERNAME'),
-                                      os.environ.get('DATABASE_PASSWORD'),
-                                      os.environ.get('DATABASE_NAME'))
-
 # Read hemnet data and geo data
-data_all = get_pandas_from_database(connection, "processed_data")
-connection.close()
+data_all = get_pandas_from_database("processed_data")
 
 shp_file = "geospatial_data_polygons_areas/JUR_PRIMÄROMRÅDEN_XU_region.shp"
 
@@ -363,8 +335,8 @@ app.layout = html.Div(
                                 html.H6("Overview of the data set", className="graph__title"),
                                 html.P(
                                     "Meaningful insights can only be drawn with a data set with sufficient number of "
-                                    "samples. If not otherwise mentioned, apartment data is used to obtain the results"),
-
+                                    "samples. If not otherwise mentioned, apartment data is used to obtain the "
+                                    "results"),
                                 dcc.Graph(figure=fig_bar_plot,
                                           id="bar_plot"),
                             ]
@@ -484,8 +456,7 @@ def predict_price(n_clicks, square_meters, number_rooms, address):
                                 "color": "#2cfec1"}
 
     output_string = html.P(
-        children=
-        [
+        children=[
             html.P("The predicted price for the listing is:"),
             html.P([locale.currency(price_prediction[0], grouping=True), " ± ", output_similar_listings[0], "%"],
                    style=style_output_predictions),
