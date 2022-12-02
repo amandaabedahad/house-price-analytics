@@ -1,3 +1,4 @@
+""" SQL-queries to interact with database"""
 import os
 import pymysql.cursors
 import pandas as pd
@@ -8,6 +9,18 @@ load_dotenv('.env')
 
 
 def create_server_connection(host_name, user_name, password, db):
+    """
+    Creates connection with database on cloud. Credentials in .env file
+
+    Parameters
+    ---------
+    host_name : str
+        sdfdsf
+
+    Returns
+    --------
+    connection
+    """
     connection = pymysql.connect(host=host_name,
                                  user=user_name,
                                  password=password,
@@ -40,19 +53,19 @@ def insert_to_database(new_data, table):
     if table == 'listing_information' or 'listing_train_or_test_set':
         new_data_sorted = new_data.sort_values(by="listing_id", ascending=False)
     else:
-        new_data_sorted = new_data.sort_values(["sold_date", "final_price", "address"], ascending=[True, True, True])
+        new_data_sorted = new_data.sort_values(["sold_date", "final_price", "address"],
+                                               ascending=[True, True, True])
     if table == "raw_data":
         sql_insert_raw_data = f"INSERT INTO {table} " \
                               f"(address, housing_type, region, city, sqr_meter, nr_rooms, " \
-                              f"rent_month, final_price, sold_date, price_increase, price_sqr_m, land_area, other_srq, " \
-                              f"listing_id) " \
-                              f"VALUES ({values_raw})"
+                              f"rent_month, final_price, sold_date, price_increase, price_sqr_m," \
+                              f"land_area, other_srq, listing_id) VALUES ({values_raw})"
     elif table == "processed_data":
         sql_insert_raw_data = f"INSERT INTO {table} " \
                               f"(address, housing_type, city, sqr_meter, nr_rooms, " \
-                              f"rent_month, final_price, sold_date, price_increase, price_sqr_m, land_area, other_srq," \
-                              f"latitude, longitude, post_code, region, listing_id) " \
-                              f"VALUES ({values_raw})"
+                              f"rent_month, final_price, sold_date, price_increase, price_sqr_m," \
+                              f"land_area, other_srq, latitude, longitude, post_code, region," \
+                              f"listing_id) VALUES ({values_raw})"
     elif table == "listing_information":
         sql_insert_raw_data = f"INSERT INTO {table} (listing_id) VALUES ({values_raw})"
     elif table == "listing_train_or_test_set":
@@ -60,10 +73,9 @@ def insert_to_database(new_data, table):
 
     new_data_removing_nan = new_data_sorted.replace({np.nan: None})
 
-    cursor = connection.cursor()
-    cursor.executemany(sql_insert_raw_data, new_data_removing_nan.values.tolist())
-    connection.commit()
-    connection.close()
+    with connection.cursor() as cursor:
+        cursor.executemany(sql_insert_raw_data, new_data_removing_nan.values.tolist())
+        connection.commit()
 
 
 def reset_train_indices_in_table(table):
@@ -72,25 +84,26 @@ def reset_train_indices_in_table(table):
                                           os.environ.get('DATABASE_PASSWORD'),
                                           os.environ.get('DATABASE_NAME'))
     sql_reset_rows = f"UPDATE {table} SET listing_in_train_set = 0"
-    cursor = connection.cursor()
-    cursor.execute(sql_reset_rows)
-    connection.commit()
-    connection.close()
+
+    with connection.cursor() as cursor:
+        cursor.execute(sql_reset_rows)
+        connection.commit()
 
 
-# This function works, but takes way too long time to execute. Takes time to find the right index where to update,
-# even when using primary keys.
+# This function works, but takes way too long time to execute. Takes time to find the right index
+# where to update, even when using primary keys.
 def update_rows_in_table(new_data, table):
     connection = create_server_connection(os.environ.get('DATABASE_HOST_NAME'),
                                           os.environ.get('DATABASE_USERNAME'),
                                           os.environ.get('DATABASE_PASSWORD'),
                                           os.environ.get('DATABASE_NAME'))
-    sql_update_rows = f"UPDATE {table} SET listing_in_train_set = %s WHERE listing_id = %s ORDER BY listing_id asc"
+    sql_update_rows = f"UPDATE {table} SET listing_in_train_set = %s WHERE listing_id = %s " \
+                      f"ORDER BY listing_id asc"
     reordered_column_data = new_data[["listing_in_train_set", "listing_id"]].values.tolist()
-    cursor = connection.cursor()
-    cursor.executemany(sql_update_rows, reordered_column_data)
-    connection.commit()
-    connection.close()
+
+    with connection.cursor() as cursor:
+        cursor.executemany(sql_update_rows, reordered_column_data)
+        connection.commit()
 
 
 # Instead of update, remove content of whole table and insert again
@@ -100,11 +113,11 @@ def remove_and_update_table(new_data, table):
                                           os.environ.get('DATABASE_PASSWORD'),
                                           os.environ.get('DATABASE_NAME'))
     sql_query_drop_column_listing_in_train = f"DELETE FROM {table}"
-    cursor = connection.cursor()
-    cursor.execute(sql_query_drop_column_listing_in_train)
 
-    sql_insert_query = f"INSERT INTO {table} VALUES (%s, %s)"
+    with connection.cursor() as cursor:
+        cursor.execute(sql_query_drop_column_listing_in_train)
 
-    cursor.executemany(sql_insert_query, new_data.values.tolist())
-    connection.commit()
-    connection.close()
+        sql_insert_query = f"INSERT INTO {table} VALUES (%s, %s)"
+
+        cursor.executemany(sql_insert_query, new_data.values.tolist())
+        connection.commit()

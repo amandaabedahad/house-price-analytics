@@ -2,14 +2,14 @@
 import xgboost as xgb
 import joblib
 from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import GridSearchCV
 import numpy as np
-from sql_queries import reset_train_indices_in_table, get_pandas_from_database, remove_and_update_table
+from sql_queries import reset_train_indices_in_table, get_pandas_from_database, \
+    remove_and_update_table
 from dotenv import load_dotenv
 
 
@@ -39,7 +39,8 @@ def lat_long_to_polar(data):
 
 
 def simple_linear_regression(X, y):
-    X_train, X_test, y_train, y_test = train_test_split(X.values, y.values, test_size=0.33, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X.values, y.values, test_size=0.33,
+                                                        random_state=42)
 
     reg = LinearRegression().fit(X_train, y_train)
 
@@ -52,12 +53,14 @@ def random_forest_regressor(data, logger=None):
     y = data[["final_price", "rent_month"]]
     X = data.drop(columns=["final_price", "rent_month"])
 
-    X_train_df, X_test_df, y_train_df, y_test_df = train_test_split(X, y, test_size=0.2, random_state=42)
+    X_train_df, X_test_df, y_train_df, y_test_df = train_test_split(X, y, test_size=0.2,
+                                                                    random_state=42)
 
     reset_train_indices_in_table("listing_train_or_test_set")
 
     data_listing_information = get_pandas_from_database("listing_train_or_test_set")
-    listings_in_train_condition = data_listing_information["listing_id"].isin(X_train_df["listing_id"].values)
+    listings_in_train_condition = data_listing_information["listing_id"].\
+        isin(X_train_df["listing_id"].values)
     data_listing_information["listing_in_train_set"][listings_in_train_condition] = 1
     remove_and_update_table(data_listing_information, "listing_train_or_test_set")
 
@@ -70,10 +73,11 @@ def random_forest_regressor(data, logger=None):
                   'max_features': [0.1, 0.3, 0.6]
                   }
     # print(sklearn.metrics.get_scorer_names())
-    RandForest = RandomForestRegressor(n_jobs=-1, random_state=0, bootstrap=True, criterion="absolute_error")
+    RandForest = RandomForestRegressor(n_jobs=-1, random_state=0, bootstrap=True,
+                                       criterion="absolute_error")
 
-    Tuned_RandForest = GridSearchCV(estimator=RandForest, param_grid=param_grid, scoring='neg_root_mean_squared_error',
-                                    cv=5)
+    Tuned_RandForest = GridSearchCV(estimator=RandForest, param_grid=param_grid,
+                                    scoring='neg_root_mean_squared_error', cv=5)
     Tuned_RandForest.fit(X_train, y_train)
     best_estimator = Tuned_RandForest.best_estimator_
     print(Tuned_RandForest.best_params_)
@@ -88,18 +92,12 @@ def random_forest_regressor(data, logger=None):
     return best_estimator
 
 
-def xgboost_model(data, logger=None):
+def xgboost_model(data):
     y = data[["final_price", "rent_month"]]
     X = data.drop(columns=["final_price", "rent_month"])
 
-    X_train_df, X_test_df, y_train_df, y_test_df = train_test_split(X, y, test_size=0.2, random_state=42)
-
-    # reset_train_indices_in_table("listing_train_or_test_set")
-
-    # data_listing_information = get_pandas_from_database("listing_train_or_test_set")
-    # listings_in_train_condition = data_listing_information["listing_id"].isin(X_train_df["listing_id"].values)
-    # data_listing_information["listing_in_train_set"][listings_in_train_condition] = 1
-    # remove_and_update_table(data_listing_information, "listing_train_or_test_set")
+    X_train_df, X_test_df, y_train_df, y_test_df = train_test_split(X, y, test_size=0.2,
+                                                                    random_state=42)
 
     X_train = X_train_df.drop(columns=["listing_id"]).values
     X_test = X_test_df.drop(columns=["listing_id"]).values
@@ -135,7 +133,8 @@ def xgboost_model(data, logger=None):
 def prep_data_ml(data_all):
     apartment_data = data_all[data_all["housing_type"] == "Lägenhet"]
     data_filtered = apartment_data[
-        ["sqr_meter", "nr_rooms", "final_price", "latitude", "longitude", "rent_month", "listing_id"]].dropna()
+        ["sqr_meter", "nr_rooms", "final_price", "latitude", "longitude", "rent_month",
+         "listing_id"]].dropna()
     data_final = data_filtered.drop(data_filtered[data_filtered["rent_month"] == 0].index, axis=0)
     return data_final
 
