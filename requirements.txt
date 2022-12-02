@@ -97,3 +97,4 @@ win-inet-pton==1.1.0
 wincertstore==0.2
 xyzservices==2022.6.0
 yarg==0.1.9
+xgboost~=1.7.1

@@ -1,26 +1,24 @@
 # -*- coding: utf-8 -*-
 import copy
-import dash
+import locale
 import joblib
-from dash import dcc
-from dash import html
 import plotly.express as px
 import folium
-import locale
 import geopandas as gpd
 import numpy as np
-from dash import Input, Output, State
-from data_process_functions import get_long_lat, clean_address_sample
+from dash import Input, Output, State, html, dcc, Dash
 import branca.colormap as cm
 import dash_bootstrap_components as dbc
+from dotenv import load_dotenv
+from data_process_functions import get_long_lat, clean_address_sample
 from sql_queries import get_pandas_from_database
 from ML_models import prep_data_ml, get_percentage_off
-from dotenv import load_dotenv
 
 
 def select_regions_with_nr_samples(data, nr_samples_threshold):
     """
-    Returns data with regions where the number of samples for each region is greater than threshold. This to get some
+    Returns data with regions where the number of samples for each region is greater than threshold.
+     This to get some
     statistical significance when plotting in box plot, and to clean up the plot a bit.
 
     :param data: pandas data frame
@@ -100,8 +98,8 @@ def plot_prices_over_time(data_to_group_and_plot):
 
 def plot_box_plot(data_to_plot, threshold=0):
     plot_data = select_regions_with_nr_samples(data_to_plot, nr_samples_threshold=threshold)
-    fig = px.box(data_frame=plot_data, x="price_sqr_m", y="region", labels={"price_sqr_m": "Price per square meter",
-                                                                            "region": "Region"})
+    fig = px.box(data_frame=plot_data, x="price_sqr_m", y="region",
+                 labels={"price_sqr_m": "Price per square meter", "region": "Region"})
     prettify_plots(fig)
 
     fig.update_yaxes(showgrid=False)
@@ -126,7 +124,7 @@ def prettify_plots(fig_plot):
 
 
 locale.setlocale(locale.LC_ALL, 'sv_SE.utf8')
-app = dash.Dash(__name__)
+app = Dash(__name__)
 application = app.server
 
 style_function = lambda x: {'fillColor': '#ffffff',
@@ -142,10 +140,10 @@ load_dotenv()
 # Read hemnet data and geo data
 data_all = get_pandas_from_database("processed_data")
 
-shp_file = "geospatial_data_polygons_areas/JUR_PRIMÄROMRÅDEN_XU_region.shp"
+SHP_FILE = "geospatial_data_polygons_areas/JUR_PRIMÄROMRÅDEN_XU_region.shp"
 
 # Clean the data
-geo_data_raw = gpd.read_file(shp_file)
+geo_data_raw = gpd.read_file(SHP_FILE)
 geo_data = geo_data_raw[["PRIMÄROMRÅ", "PRIMÄRNAMN", "geometry"]]
 geo_data = geo_data.rename(columns={"PRIMÄRNAMN": "region"})
 data_nan_dropped = data_all.dropna(subset=["latitude", "longitude", "price_sqr_m"])
@@ -162,7 +160,8 @@ data_apartments = data_nan_dropped[data_nan_dropped["housing_type"] == "Lägenhe
 data_grouped_by_region = data_apartments.groupby(["region"], as_index=False).mean()
 
 # Merge the grouped data with the polygon data --> yields the average data for each polygon (region)
-geo_data_map = geo_data.merge(data_grouped_by_region[["price_sqr_m", "region"]], on="region", how="left")
+geo_data_map = geo_data.merge(data_grouped_by_region[["price_sqr_m", "region"]], on="region",
+                              how="left")
 
 geo_data_map = geo_data_map.dropna(subset=["price_sqr_m"])
 geo_data_map["price_sqr_m"] = geo_data_map["price_sqr_m"].apply(round)
@@ -176,12 +175,14 @@ interactive_regions = folium.features.GeoJson(
     tooltip=folium.features.GeoJsonTooltip(
         fields=['region', 'price_sqr_m'],
         aliases=['Region: ', 'Price per square meter in kr: '],
-        style="background-color: white; color: #333333; font-family: arial; font-size: 12px; padding: 10px;"
+        style="background-color: white; color: #333333; font-family: arial; "
+              "font-size: 12px; padding: 10px;"
     )
 )
 
 linear_colormap = cm.linear.YlOrRd_09.to_step(data=geo_data_map["price_sqr_m"],
-                                              index=[10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000,
+                                              index=[10000, 20000, 30000, 40000, 50000, 60000,
+                                                     70000, 80000, 90000,
                                                      100000])
 
 linear_colormap.caption = "Price per square meter (SEK)"
@@ -202,8 +203,8 @@ ma.keep_in_front(interactive_regions)
 folium.LayerControl().add_to(ma)
 ma.save('map_city.html')
 
-fig_bar_plot = px.histogram(data_frame=data_all, x="housing_type", labels={"housing_type": "Housing type",
-                                                                           "count": "Number of listings"})
+fig_bar_plot = px.histogram(data_frame=data_all, x="housing_type",
+                            labels={"housing_type": "Housing type", "count": "Number of listings"})
 
 prettify_plots(fig_bar_plot)
 
@@ -236,7 +237,8 @@ app.layout = html.Div(
                     children=[
                         html.Div(
                             children=[
-                                html.H6("Pricing situation in Gothenburg", className="graph__title"),
+                                html.H6("Pricing situation in Gothenburg",
+                                        className="graph__title"),
                                 html.P(
                                     "The interactive map presents how the average cost per square "
                                     "meter "
@@ -254,8 +256,8 @@ app.layout = html.Div(
                                 html.Iframe(id='map1', srcDoc=open('map_city.html', 'r').read(),
                                             height='80%', width='100%'),
                                 html.P(
-                                    "For a more in depth visualisation of the pricing situation, continue to the box "
-                                    "plot, "
+                                    "For a more in depth visualisation of the pricing situation, "
+                                    "continue to the box plot, "
                                     "presented at the bottom of this page. ")
                             ]
                         )
@@ -266,12 +268,11 @@ app.layout = html.Div(
                     children=[
                         html.H2("Predict house price using ML", className="graph__title"),
                         html.P(
-                            "As of today, Hemnet provides house price prediction as a beta service on their"
-                            " webpage. This is however limited only to apartments in Stockholm, Sweden. "
-                            "Similar functionality is here presented for Gothenburg.  The following "
-                            "parameters "
-                            "will be used to predict the sold price for apartments, "
-                            "using ML"),
+                            "As of today, Hemnet provides house price prediction as a beta service"
+                            " on their webpage. This is however limited only to apartments in "
+                            "Stockholm, Sweden. Similar functionality is here presented for "
+                            "Gothenburg.  The following parameters "
+                            "will be used to predict the sold price for apartments, using ML"),
                         html.P(
                             className="slider-text",
                             children="Drag the slider to change number of square meters:",
@@ -333,9 +334,9 @@ app.layout = html.Div(
                             children=[
                                 html.H6("Overview of the data set", className="graph__title"),
                                 html.P(
-                                    "Meaningful insights can only be drawn with a data set with sufficient number of "
-                                    "samples. If not otherwise mentioned, apartment data is used to obtain the "
-                                    "results"),
+                                    "Meaningful insights can only be drawn with a data set with "
+                                    "sufficient number of samples. If not otherwise mentioned, "
+                                    "apartment data is used to obtain the results"),
                                 dcc.Graph(figure=fig_bar_plot,
                                           id="bar_plot"),
                             ]
@@ -363,9 +364,11 @@ app.layout = html.Div(
         html.Div(
             [
                 html.Div(
-                    children=[dcc.Graph(figure=plot_scatter_rooms_type(data_apartments), className='plot',
+                    children=[dcc.Graph(figure=plot_scatter_rooms_type(data_apartments),
+                                        className='plot',
                                         id="price-per-room"),
-                              dcc.Graph(id="price-over-time", figure=plot_prices_over_time(data_apartments),
+                              dcc.Graph(id="price-over-time",
+                                        figure=plot_prices_over_time(data_apartments),
                                         className="plot")],
                     className="parent"
                 )
@@ -373,18 +376,22 @@ app.layout = html.Div(
         ),
         html.Div(
             children=[html.H2("In depth view of the pricing situation", className="graph__title"),
-                      html.P("The box plot visualizes the spread of a data group using statistical metrics - more "
-                             "specifically the median and quartiles. For example, someone who wants to buy an "
-                             "apartment in Agnesberg can expect to pay a median of ~23k per square meter, where most "
-                             "listings lay inbetween ~20k-~26k. In addition, there exist listings with an average of "
+                      html.P("The box plot visualizes the spread of a data group using statistical"
+                             "metrics - more specifically the median and quartiles. For example, "
+                             "someone who wants to buy an "
+                             "apartment in Agnesberg can expect to pay a median of ~23k per "
+                             "square meter, where most "
+                             "listings lay inbetween ~20k-~26k. In addition, there exist listings "
+                             "with an average of "
                              "18k per square meter, up to 35k per square meter."),
-                      html.H3("In summary, this plot provides easy comparison between regions, and a quick overview"
+                      html.H3("In summary, this plot provides easy comparison between regions, "
+                              "and a quick overview "
                               " of what prices to expect as a buyer", style={"color": "#2cfec1"}),
                       html.P("Select one or several regions for easy comparison"),
                       dcc.Dropdown(id="selected-regions",
                                    options=[
-                                       {"label": object_type, "value": object_type} for object_type in
-                                       data_apartments["region"].unique()
+                                       {"label": object_type, "value": object_type} for object_type
+                                       in data_apartments["region"].unique()
                                    ],
                                    multi=True,
                                    className="chart-dropdown"
@@ -428,11 +435,11 @@ def predict_price(n_clicks, square_meters, number_rooms, address):
     latitude, longitude, post_code = get_long_lat(address)
 
     if clean_address_sample(address) is None:
-        return "The format of the address is wrong and not allowed. Try another one.", new_loading_style, {
-            "color": "red"}
+        return "The format of the address is wrong and not allowed. Try another one.", \
+               new_loading_style, {"color": "red"}
     if latitude is None:
-        return "The address is not found in Gothenburg municipality. Try another one", new_loading_style, {
-            "color": "red"}
+        return "The address is not found in Gothenburg municipality. Try another one", \
+               new_loading_style, {"color": "red"}
 
     x = np.array([square_meters, number_rooms, latitude, longitude])
     price_prediction, rent_prediction = use_random_forest_model(x.reshape(1, -1))
@@ -441,30 +448,37 @@ def predict_price(n_clicks, square_meters, number_rooms, address):
     if X_similar_listings is None:
         output_similar_listings = None, None
     else:
-        x_similar_listings = X_similar_listings[["sqr_meter", "nr_rooms", "latitude", "longitude"]].values
+        x_similar_listings = \
+            X_similar_listings[["sqr_meter", "nr_rooms", "latitude", "longitude"]].values
 
-        price_prediction_sim_listings, rent_prediction_sim_listings = use_random_forest_model(x_similar_listings)
+        price_prediction_sim_listings, rent_prediction_sim_listings = \
+            use_random_forest_model(x_similar_listings)
 
-        price_percentage_off_similar_listings = round(get_percentage_off(y_similar_listings["final_price"].values,
-                                                                         price_prediction_sim_listings).mean(axis=0), 1)
+        price_percentage_off_similar_listings = \
+            round(get_percentage_off(y_similar_listings["final_price"].values,
+                                     price_prediction_sim_listings).mean(axis=0), 1)
         rent_percentage_off = round(get_percentage_off(y_similar_listings["rent_month"].values,
-                                                       rent_prediction_sim_listings).mean(axis=0), 1)
+                                                       rent_prediction_sim_listings).mean(axis=0),
+                                    1)
         output_similar_listings = price_percentage_off_similar_listings, rent_percentage_off
 
-    style_output_predictions = {"font-size": "2em", "margin": "0", "margin-top": "0", "font-weight": "Bold",
+    style_output_predictions = {"font-size": "2em", "margin": "0", "margin-top": "0",
+                                "font-weight": "Bold",
                                 "color": "#2cfec1"}
 
     output_string = html.P(
         children=[
             html.P("The predicted price for the listing is:"),
-            html.P([locale.currency(price_prediction[0], grouping=True), " ± ", output_similar_listings[0], "%"],
+            html.P([locale.currency(price_prediction[0], grouping=True), " ± ",
+                    output_similar_listings[0], "%"],
                    style=style_output_predictions),
             html.P("The predicted monthly fee for the listing above is:"),
-            html.P([locale.currency(rent_prediction[0], grouping=True), " ± ", output_similar_listings[1], "%"],
+            html.P([locale.currency(rent_prediction[0], grouping=True), " ± ",
+                    output_similar_listings[1], "%"],
                    style=style_output_predictions),
             dbc.Tooltip(children=[
-                "Using the ML-model, the average percentage off on similar listings are calculated. "
-                "Listings are considered to be similar if:",
+                "Using the ML-model, the average percentage off on similar listings are "
+                "calculated. Listings are considered to be similar if:",
                 html.Ul([html.Li("Located in the same area (same post code)"),
                          html.Li("Similar number of rooms - equal, one more or one less"),
                          html.Li("Similar size - 20sqm more or less")]),
@@ -477,11 +491,6 @@ def predict_price(n_clicks, square_meters, number_rooms, address):
                       style={"textDecoration": "underline", "cursor": "pointer", "color": "white"})
         ]
     )
-    '''map_temporary = copy.copy(ma)
-    folium.Marker([latitude, longitude]).add_to(map_temporary)
-    map_temporary.save('map_city_with_temp.html')
-    map_temporary._children.popitem(last=True)
-    test = open('map_city_with_temp.html', 'r').read()'''
 
     return output_string, new_loading_style, None
 
