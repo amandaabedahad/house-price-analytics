@@ -1,4 +1,5 @@
 # Housing analytics - data aquisition and analytics
+tbc
 
 ## Table of contents
 * [General info](#general-info)
@@ -11,7 +12,7 @@ This project aims to provide data driven insights of the house market situation 
 This project can be divided into three parts: data aqusition, data analytics and app deployment
 
 ### Data aquistion 
-The data is aquired through web scraping on Hemnet's webpage for sold listings (URL).
+The data is aquired through web scraping on Hemnet's webpage for sold listings (https://hemnetanalyticsdocker.azurewebsites.net/).
 The dataset consists of the following entities: 
 * Address
 * Housing type
