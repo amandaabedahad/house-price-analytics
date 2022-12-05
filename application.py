@@ -1,3 +1,6 @@
+"""
+Application run script. Hosts app locally.
+"""
 # -*- coding: utf-8 -*-
 import copy
 import locale
@@ -17,13 +20,19 @@ from ML_models import prep_data_ml, get_percentage_off
 
 def select_regions_with_nr_samples(data, nr_samples_threshold):
     """
-    Returns data with regions where the number of samples for each region is greater than threshold.
-     This to get some
-    statistical significance when plotting in box plot, and to clean up the plot a bit.
+    Returns a dataframe where regions with fewer samples than the threshold are filtered out.
 
-    :param data: pandas data frame
-    :param nr_samples_threshold: threshold which decides which regions to keep
-    :return: filtered data set
+    Parameters
+    ----------
+    data: pd
+        Pandas frame with data
+    nr_samples_threshold: int
+        Threshold for how many samples in each region that we want to keep
+
+    Returns
+    -------
+    new_selection: dataframe
+        Dataframe where regions with fewer samples than threshold are filtered out
     """
     df_part = data[["housing_type", "price_sqr_m", "region"]]
     df_part = df_part.loc[df_part.housing_type == "Lägenhet"]
@@ -42,7 +51,25 @@ def use_random_forest_model(x, path_model="random_forest_model.joblib"):
 
 
 def find_similar_listings(x, postcode):
-    # find listings in same region with same number of rooms and ish same square meter.
+    """
+    Find similar listings to a listing x. Similar if same post code, similar number of rooms and
+    square meter.
+
+    Parameters
+    ----------
+    x: list
+        Attributes of listing, long lat sqrm rooms
+    postcode: str
+        Post code of listing x
+
+    Returns
+    -------
+    similar_listings: dataframe, None
+        Pandas frame of containing the features of the similar listings.
+        If None, no similar listings were found
+    y_similar_listings: dataframe, None
+        Target information of similar listings, that is price and monthly fee.
+    """
 
     all_data_from_database = copy.deepcopy(data_all)
     data_used_by_ML = prep_data_ml(all_data_from_database)
