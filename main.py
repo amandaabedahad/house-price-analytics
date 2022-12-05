@@ -1,11 +1,11 @@
 """
-Main script that scrapes hemnet of data, and processes it into wanted format.
+Main script that scrapes hemnet of data, and processes it into wanted format. Stores data in
+database. Credentials in .env file.
 """
 import copy
 # -*- coding: utf-8 -*-
 import os
 import sys
-from os.path import exists
 import logging
 import re
 from tqdm import tqdm
@@ -20,6 +20,24 @@ from sql_queries import get_pandas_from_database, insert_to_database
 
 def get_nr_new_samples_since_last_ml_update(
         logger_path, nr_listings_trigger_ml_update, target_word):
+    """
+    Returns the number of samples since last ml update. Looks for information in log file.
+
+    Parameters
+    ----------
+    logger_path: str
+        Path to logger file
+    nr_listings_trigger_ml_update: int
+        Number of listings between each ML-update
+    target_word: str
+        Word to search for in log file to get number of added listings since last ML-update
+
+    Returns
+    -------
+    int, bool
+        Number of found listings since last ML-update and bool that represents if we have reached
+        nr of total listings.
+    """
     sum_new_listings = 0
     with open(logger_path) as logger_file:
         for line in reversed(list(logger_file)):
@@ -41,11 +59,9 @@ load_dotenv('.env')
 
 if __name__ == "__main__":
     PATH_SHP_FILE = "geospatial_data_polygons_areas/JUR_PRIMÄROMRÅDEN_XU_region.shp"
-
     PATH_LOG_FILE = "logs/logging_file.txt"
-    if not exists(PATH_LOG_FILE):
-        os.makedirs(PATH_LOG_FILE.split('/')[0], exist_ok=True)
-        f = open(PATH_LOG_FILE, "w+")
+
+    os.makedirs(PATH_LOG_FILE.split('/')[0], exist_ok=True)
     logging.basicConfig(filename=PATH_LOG_FILE, filemode="a", level=logging.INFO,
                         format='%(asctime)s - %(levelname)s '
                                '- %(message)s')
