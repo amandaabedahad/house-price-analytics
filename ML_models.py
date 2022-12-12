@@ -1,4 +1,5 @@
 """ contains several different ML-models"""
+import pandas
 import xgboost as xgb
 import joblib
 from sklearn.linear_model import LinearRegression
@@ -12,6 +13,59 @@ from sql_queries import reset_train_indices_in_table, get_pandas_from_database, 
     remove_and_update_table
 from dotenv import load_dotenv
 
+
+class Trainer:
+    def __init__(self,
+                 dataset: pandas.DataFrame,
+                 model,
+                 save_model,
+                 target_variables,
+                 test_size,
+                 n_estimators,
+                 max_features,
+                 criterion,
+                 perform_grid_search
+                 ):
+
+        self.dataset = dataset
+        self.model = model
+        self.save_model = save_model
+        self.target_variables = target_variables
+        self.test_size = test_size
+        self.n_estimators = n_estimators
+        self.max_features = max_features
+        self.criterion = criterion
+        self.perform_grid_search = perform_grid_search
+
+    def split(self):
+        pass
+
+    def split_train_test(self):
+        pass
+
+    def train(self):
+        pass
+
+    def evaluate_model(self):
+        pass
+
+
+class DataPreprocessing:
+    def __init__(self,
+                 test_size):
+        self.test_size = test_size
+
+
+class Dataset:
+
+    def __init__(self, raw_data, processed_data):
+        self.raw_data = raw_data
+        self.processed_data = processed_data
+        s
+
+
+class Visualization:
+    pass
 
 def plot_corr_heatmap(df):
     plt.clf()
@@ -59,7 +113,7 @@ def random_forest_regressor(data, logger=None):
     reset_train_indices_in_table("listing_train_or_test_set")
 
     data_listing_information = get_pandas_from_database("listing_train_or_test_set")
-    listings_in_train_condition = data_listing_information["listing_id"].\
+    listings_in_train_condition = data_listing_information["listing_id"]. \
         isin(X_train_df["listing_id"].values)
     data_listing_information["listing_in_train_set"][listings_in_train_condition] = 1
     remove_and_update_table(data_listing_information, "listing_train_or_test_set")
