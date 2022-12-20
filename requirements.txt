@@ -38,7 +38,7 @@ geopy==2.2.0
 idna==3.3
 itsdangerous==2.0.1
 Jinja2==3.0.3
-joblib==1.1.0
+joblib==1.2.0
 kiwisolver==1.4.2
 lxml==4.9.1
 mapclassify==2.4.3
